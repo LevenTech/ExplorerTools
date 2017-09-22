@@ -7,12 +7,20 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;                                   |
 ; ExplorerTools by LevenTech        |
 ;                                   |
-; Version 1.4 (9-21-17)             |
+; Version 1.5 (9-22-17)             |
 ;                                   |
 ; Optional Add-Ons:                 |
 ;  - Files2Folder                   |
 ;-----------------------------------|
 
+HideTrayTip() {
+    TrayTip  ; Attempt to hide it the normal way.
+    if SubStr(A_OSVersion,1,3) = "10." {
+        Menu Tray, NoIcon
+        Sleep 200  ; It may be necessary to adjust this sleep.
+        Menu Tray, Icon
+    }
+}
 
 ; TRAY ICON CONFIGURATION
 ;-------------------------
@@ -104,6 +112,9 @@ MyHelp:
 	Send, {F2}
 	Sleep, 100
 	Send, ^c
+	TrayTip Copied Filename, %clipboard%
+	Sleep 3000   ; Let it display for 3 seconds.
+	HideTrayTip()
 	Send, {Esc}
 	Return
 
@@ -113,6 +124,9 @@ MyHelp:
 	Sleep, 100
 	Send, ^v
 	Send, {Enter}
+	TrayTip Pasted Filename, %clipboard%
+	Sleep 2000   ; Let it display for 3 seconds.
+	HideTrayTip()
 	Return
 
 ^!x:: 
@@ -121,5 +135,8 @@ MyHelp:
 	Sleep, 100
 	Send, ^v
 	Send, .en
+	TrayTip Pasted Subtitles, %clipboard%.en
+	Sleep 3000   ; Let it display for 3 seconds.
+	HideTrayTip()
 	Send, {Enter}
 	Return

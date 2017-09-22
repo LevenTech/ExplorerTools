@@ -34,7 +34,7 @@ HideTrayTip() {
     TrayTip  ; Attempt to hide it the normal way.
     if SubStr(A_OSVersion,1,3) = "10." {
         Menu Tray, NoIcon
-        Sleep 200  ; It may be necessary to adjust this sleep.
+        Sleep 500  ; It may be necessary to adjust this sleep.
         Menu Tray, Icon
     }
 }
@@ -166,8 +166,8 @@ MyHelp:
 	Send, ^c
 	Send, {Esc}
 	Sleep, 100
-	TrayTip Copied Filename, %clipboard%
-	Sleep 3000
+	TrayTip Copied Filename, %clipboard%, , 16
+	Sleep, 1500
 	HideTrayTip()
 	Return
 
@@ -177,17 +177,19 @@ MyHelp:
 	Send, ^v
 	Send, {Enter}
 	Sleep 100
-	TrayTip Pasted Filename, %clipboard%
-	Sleep, 2000
+	TrayTip Pasted Filename, %clipboard%, , 16
+	Sleep, 1500
 	HideTrayTip()
 	Return
 
 ^+x:: 
-	TrayTip Pasting Subtitles, %clipboard%.en
 	Send, {F2}
+	Sleep, 200
+	Send, ^v
+	Send, .en{Enter}
 	Sleep, 100
-	Send, ^v.en{Enter}
-	Sleep 3000   ; Let it display for 3 seconds.
+	TrayTip Pasted Subtitles, %clipboard%.en, , 17
+	Sleep, 2000
 	HideTrayTip()
 	Return
 

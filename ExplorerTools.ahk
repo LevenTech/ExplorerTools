@@ -21,6 +21,7 @@ Menu, Tray, Icon, ExplorerTools.ico, 1, 0
 
 Menu, Tray, NoStandard
 Menu, Tray, Add, Instructions, MyHelp
+Menu, Tray, Add, Download Files2Folder, DownloadF2F
 Menu, Tray, Default, Instructions 
 Menu, Tray, Standard
 Return
@@ -28,22 +29,37 @@ Return
 
 ; HELP TEXT
 ;-----------
+
+DownloadF2F:
+	Run, http://skwire.dcmembers.com/wb/pages/software/files-2-folder.php
+	Return
+
 MyHelp: 
 +^/::
 !^/::
 	message = 
 	message = %message%`n Windows+C: `tOpen C:\ drive
-	message = %message%`n Windows+D: `tOpen D:\ drive`n
-	message = %message%`n Ctrl+Alt/Shift+F: `tMove file to folder with same name
-	message = %message%`n Ctrl+Alt/Shift+D: `tMove files to folders with same names`n
-	message = %message%`n note: these require the third-party app <a href="http://skwire.dcmembers.com/wb/pages/software/files-2-folder.php">Files2Folder</a>
+	message = %message%`n Windows+D: `tOpen D:\ drive
+	message = %message%`n
 	message = %message%`n Ctrl+Alt/Shift+C: `tCopy filename to clipboard (no extension)
+	message = %message%`n
 	message = %message%`n Ctrl+Alt/Shift+V: `tPaste clipboard into filename (no extension)
-	message = %message%`n Ctrl+Alt/Shift+S: `tPaste clipboard into filename and append ".en"`n
+	message = %message%`n Ctrl+Alt/Shift+S: `tPaste clipboard into filename and append ".en"
 	message = %message%`n Ctrl+Alt/Shift+X: `tPaste clipboard into filename and stay in the field
-	message = %message%`n Ctrl+Context: `tOpen Task Manager`n
-	message = %message%`n Ctrl+Alt/Shift+R: `tEmpty Recycle Bin`n
+	message = %message%`n
+	message = %message%`n Ctrl+Context: `tOpen Task Manager
+	message = %message%`n
+	message = %message%`n Ctrl+Alt/Shift+R: `tEmpty Recycle Bin
+	message = %message%`n
 	message = %message%`n Ctrl+Alt/Shift+?: `tOpen This Help Window
+	message = %message%`n
+	message = %message%`n FILES2FOLDER SHORTCUTS
+	message = %message%`n (these require Files2Folder - download from link in tray icon)
+	message = %message%`n ------------------------------------------------------------------------
+	message = %message%`n Ctrl+Alt/Shift+F: `tMove file to folder with same name
+	message = %message%`n Ctrl+Alt/Shift+D: `tMove files to folders with same names
+
+
 	MsgBox, , ExplorerTools by LevenTech, %message%
 	Return
 

@@ -112,10 +112,10 @@ MyHelp:
 	Send, {F2}
 	Sleep, 100
 	Send, ^c
+	Send, {Esc}
 	TrayTip Copied Filename, %clipboard%
 	Sleep 3000   ; Let it display for 3 seconds.
 	HideTrayTip()
-	Send, {Esc}
 	Return
 
 ^!v::

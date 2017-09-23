@@ -17,6 +17,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ; FEATURE CONFIG
 ;----------------
 QuickExtensionChange = 1
+QuickProgramFiles = 1
 
 ; TRAY ICON CONFIGURATION
 ;-------------------------
@@ -26,6 +27,7 @@ Menu, Tray, Icon, ExplorerTools.ico, 1, 0
 Menu, Tray, NoStandard
 Menu, Tray, Add, Instructions, MyHelp
 Menu, Tray, Add, Disable Auto-Extension Change, DisableExtChg
+Menu, Tray, Add, Disable Auto-Program Files Change, DisablePFChg
 Menu, Tray, Add, Download Files2Folder, DownloadF2F
 Menu, Tray, Default, Instructions 
 Menu, Tray, Standard
@@ -39,23 +41,47 @@ HideTrayTip() {
     }
 }
 
-MyLoop:
+;SetTimer, MyLoop, -100
+;SetTimer, ProgramFilesLoop, -100
+;Return
+	
 ; ONGOING BACKGROUND CODE
 ;-------------------------
-if (QuickExtensionChange = 1) {
-	While, 1
+
+MyLoop:
+While, 1
+{
+	;TrayTip Checking, Checking, 1, 16
+	;Sleep, 1000
+	;HideTrayTip()
+	IfWinActive, Destination Folder Access Denied ahk_class OperationStatusWindow
 	{
-		WinWaitActive, Rename ahk_class #32770
-		if (QuickExtensionChange = 1) {
-			send y
+		if (QuickProgramFiles = 1) {
+			send, {enter}
+			Sleep, 100
+			TrayTip Auto-Confirmed, Change to Program Files Folder, 2, 16
+			Sleep, 2000
+			HideTrayTip()
 		} else {
 			Return
 		}
 	}
+	IfWinActive, Rename ahk_class #32770
+	{
+		if (QuickExtensionChange = 1) {
+			send, y
+			Sleep, 100
+			TrayTip Auto-Confirmed, Change to File Extension, 2, 16
+			Sleep, 2000
+			HideTrayTip()
+		} else {
+			Return
+		}	
+	}
 }
 Return
 
-; HELP TEXT
+; MENU OPTIONS
 ;-----------
 
 DownloadF2F:
@@ -72,9 +98,22 @@ EnableExtChg:
 	QuickExtensionChange = 1
 	Menu, Tray, Delete, Enable Auto-Extension Change
 	Menu, Tray, Insert, Download Files2Folder, Disable Auto-Extension Change, DisableExtChg
-	Goto, MyLoop
 	Return
+	
+DisablePFChg:
+	QuickProgramFiles = 0
+	Menu, Tray, Delete, Disable Auto-Program Files Change
+	Menu, Tray, Insert, Download Files2Folder, Enable Auto-Program Files Change, EnablePFChg
+	Return
+	
+EnablePFChg:
+	QuickExtensionChange = 1
+	Menu, Tray, Delete, Enable Auto-Program Files Change
+	Menu, Tray, Insert, Download Files2Folder, Disable Auto-Program Files Change, DisablePFChg
+	Return	
 
+; HELP TEXT
+;-----------
 MyHelp: 
 +^/::
 !^/::
@@ -84,6 +123,14 @@ MyHelp:
 		message = %message%`n      (enable the prompt from the tray icon)
 	} else {
 		message = %message%`n File extension changes are CONFIRMED
+		message = %message%`n      (disable the prompt from the tray icon)
+	}
+	message = %message%`n
+	if (QuickProgramFiles = 1) {
+		message = %message%`n Program Files changes are AUTOMATIC
+		message = %message%`n      (enable the prompt from the tray icon)
+	} else {
+		message = %message%`n Program Files changes are CONFIRMED
 		message = %message%`n      (disable the prompt from the tray icon)
 	}
 	message = %message%`n

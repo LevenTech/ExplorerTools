@@ -7,7 +7,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;                                   |
 ; ExplorerTools by LevenTech        |
 ;                                   |
-; Version 1.5 (9-22-17)             |
+; Version 1.6 (9-24-17)             |
 ;                                   |
 ; Optional Add-Ons:                 |
 ;  - Files2Folder                   |
@@ -19,6 +19,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 QuickExtensionChange = 1
 QuickProgramFiles = 1
 
+
 ; TRAY ICON CONFIGURATION
 ;-------------------------
 Menu, Tray, Tip, ExplorerTools by LevenTech
@@ -29,6 +30,9 @@ Menu, Tray, Add, Instructions, MyHelp
 Menu, Tray, Add, Disable Auto-Extension Change, DisableExtChg
 Menu, Tray, Add, Disable Auto-Program Files Change, DisablePFChg
 Menu, Tray, Add, Download Files2Folder, DownloadF2F
+Menu, Tray, Add
+Menu, Tray, Add, Edit Script, EditScript
+Menu, Tray, Add, Exit Script to Recompile, ReloadScript
 Menu, Tray, Default, Instructions 
 Menu, Tray, Standard
 
@@ -41,49 +45,116 @@ HideTrayTip() {
     }
 }
 
-;SetTimer, MyLoop, -100
-;SetTimer, ProgramFilesLoop, -100
-;Return
-	
-; ONGOING BACKGROUND CODE
-;-------------------------
 
-MyLoop:
-While, 1
-{
-	;TrayTip Checking, Checking, 1, 16
-	;Sleep, 1000
-	;HideTrayTip()
-	IfWinActive, Destination Folder Access Denied ahk_class OperationStatusWindow
-	{
-		if (QuickProgramFiles = 1) {
-			send, {enter}
-			Sleep, 100
-			TrayTip Auto-Confirmed, Change to Program Files Folder, 2, 16
-			Sleep, 2000
-			HideTrayTip()
-		} else {
-			Return
-		}
+; HELP TEXT
+;-----------
+MyHelp: 
++^/::
+!^/::
+	message = 
+	if (QuickExtensionChange = 1) {
+		message = %message%`n File extension changes are AUTOMATIC
+		message = %message%`n      (enable the prompt from the tray icon)
+	} else {
+		message = %message%`n File extension changes are CONFIRMED
+		message = %message%`n      (disable the prompt from the tray icon)
 	}
-	IfWinActive, Rename ahk_class #32770
-	{
-		if (QuickExtensionChange = 1) {
-			send, y
-			Sleep, 100
-			TrayTip Auto-Confirmed, Change to File Extension, 2, 16
-			Sleep, 2000
-			HideTrayTip()
-		} else {
-			Return
-		}	
+	message = %message%`n
+	if (QuickProgramFiles = 1) {
+		message = %message%`n Program Files changes are AUTOMATIC
+		message = %message%`n      (enable the prompt from the tray icon)
+	} else {
+		message = %message%`n Program Files changes are CONFIRMED
+		message = %message%`n      (disable the prompt from the tray icon)
 	}
-}
+	message = %message%`n
+	message = %message%`n
+	message = %message%`n  Ctrl + Alt/Shift + ?: `tOpen This Help Window
+	message = %message%`n
+	message = %message%`n
+	message = %message%`n  WINDOWS TOOLS
+	message = %message%`n -------------------------------------------------------
+	message = %message%`n  Win + Context: `tOpen Task Manager
+	message = %message%`n  Ctrl + Win + R: `tEmpty Recycle Bin
+	message = %message%`n -------------------------------------------------------
+	message = %message%`n
+	message = %message%`n  LOCATION SHORTCUTS
+	message = %message%`n -------------------------------------------------------
+	message = %message%`n  Win + C: `tOpen C:\ drive
+	message = %message%`n  Win + D: `tOpen D:\ drive
+	message = %message%`n  Win + E: `tOpen E:\ drive
+	message = %message%`n  Win + F: `tOpen F:\ drive
+	message = %message%`n -------------------------------------------------------
+	message = %message%`n
+	message = %message%`n  FILE NAME COPY / PASTE TOOLS
+	message = %message%`n -----------------------------------------------------------------------------
+	message = %message%`n  Ctrl + Shift + C: `tCopy filename to clipboard (no extension)
+	message = %message%`n  Ctrl + Shift + X: `tCopy filename and delete file
+	message = %message%`n  Ctrl + Shift + V: `tPaste clipboard into filename (no extension)
+	message = %message%`n  Ctrl + Shift + S: `tPaste clipboard into filename and append ".en"
+	message = %message%`n  Ctrl + Shift + X: `tPaste clipboard into filename and stay in the field
+	message = %message%`n -----------------------------------------------------------------------------
+	message = %message%`n
+	message = %message%`n  FILES2FOLDER (download add-on from tray icon)
+	message = %message%`n -----------------------------------------------------------------------------
+	message = %message%`n  Ctrl + Shift + F: `tMove file to folder with same name
+	message = %message%`n  Ctrl + Shift + G: `tMove files to folders with same names
+	message = %message%`n -----------------------------------------------------------------------------
+	MsgBox, , ExplorerTools by LevenTech, %message%
 Return
 
-; MENU OPTIONS
-;-----------
 
+; ONGOING BACKGROUND CODE
+;-------------------------
+MyLoop:
+	While, 1
+	{
+		;TrayTip Checking, Checking, 1, 16
+		;Sleep, 1000
+		;HideTrayTip()
+		IfWinActive, Destination Folder Access Denied ahk_class OperationStatusWindow
+		{
+			if (QuickProgramFiles = 1) {
+				send, {enter}
+				Sleep, 100
+				TrayTip Auto-Confirmed, Change to Program Files Folder, 2, 16
+				Sleep, 2000
+				HideTrayTip()
+			} else {
+				Return
+			}
+		}
+		IfWinActive, Rename ahk_class #32770
+		{
+			if (QuickExtensionChange = 1) {
+				send, y
+				Sleep, 100
+				TrayTip Auto-Confirmed, Change to File Extension, 2, 16
+				Sleep, 2000
+				HideTrayTip()
+			} else {
+				Return
+			}	
+		}
+	}
+Return
+
+
+; MENU OPTIONS
+;--------------
+EditScript: 
+	message = 
+	Run, notepad++.exe "D:\OneDrive\LevenTech\Apps\GitHub\ExplorerTools\ExplorerTools.ahk"
+	Return
+
+ReloadScript: 
+	SetTimer, ExitMe, -100
+	Run, "C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe"
+	Exit
+
+ExitMe: 
+	ExitApp
+	
 DownloadF2F:
 	Run, http://skwire.dcmembers.com/wb/pages/software/files-2-folder.php
 	Return
@@ -112,75 +183,13 @@ EnablePFChg:
 	Menu, Tray, Insert, Download Files2Folder, Disable Auto-Program Files Change, DisablePFChg
 	Return	
 
-; HELP TEXT
-;-----------
-MyHelp: 
-+^/::
-!^/::
-	message = 
-	if (QuickExtensionChange = 1) {
-		message = %message%`n File extension changes are AUTOMATIC
-		message = %message%`n      (enable the prompt from the tray icon)
-	} else {
-		message = %message%`n File extension changes are CONFIRMED
-		message = %message%`n      (disable the prompt from the tray icon)
-	}
-	message = %message%`n
-	if (QuickProgramFiles = 1) {
-		message = %message%`n Program Files changes are AUTOMATIC
-		message = %message%`n      (enable the prompt from the tray icon)
-	} else {
-		message = %message%`n Program Files changes are CONFIRMED
-		message = %message%`n      (disable the prompt from the tray icon)
-	}
-	message = %message%`n
-	message = %message%`n  ---------------------------------------------------------------
-	message = %message%`n  |  NOTE:`t`t`t`t`t`t|
-	message = %message%`n  |   These shortcuts say`t Ctrl + Alt   +  ___      `t|
-	message = %message%`n  |   but you can also use`t Ctrl + Shift +  ___      `t|
-	message = %message%`n  ---------------------------------------------------------------
-	message = %message%`n
-	message = %message%`n
-	message = %message%`n  Ctrl + Alt + ?: `tOpen This Help Window
-	message = %message%`n
-	message = %message%`n
-	message = %message%`n  WINDOWS TOOLS
-	message = %message%`n -------------------------------------------------------
-	message = %message%`n  Ctrl + Context: `tOpen Task Manager
-	message = %message%`n  Ctrl + Alt + R: `tEmpty Recycle Bin
-	message = %message%`n -------------------------------------------------------
-	message = %message%`n
-	message = %message%`n  LOCATION SHORTCUTS
-	message = %message%`n -------------------------------------------------------
-	message = %message%`n  Win + C: `tOpen C:\ drive
-	message = %message%`n  Win + D: `tOpen D:\ drive
-	message = %message%`n -------------------------------------------------------
-	message = %message%`n
-	message = %message%`n  FILE NAME COPY / PASTE TOOLS
-	message = %message%`n -----------------------------------------------------------------------------
-	message = %message%`n  Ctrl + Alt + C: `tCopy filename to clipboard (no extension)
-	message = %message%`n  Ctrl + Alt + V: `tPaste clipboard into filename (no extension)
-	message = %message%`n  Ctrl + Alt + S: `tPaste clipboard into filename and append ".en"
-	message = %message%`n  Ctrl + Alt + X: `tPaste clipboard into filename and stay in the field
-	message = %message%`n -----------------------------------------------------------------------------
-	message = %message%`n
-	message = %message%`n  FILES2FOLDER (download add-on from tray icon)
-	message = %message%`n -----------------------------------------------------------------------------
-	message = %message%`n  Ctrl + Alt + F: `tMove file to folder with same name
-	message = %message%`n  Ctrl + Alt + D: `tMove files to folders with same names
-	message = %message%`n -----------------------------------------------------------------------------
-
-	MsgBox, , ExplorerTools by LevenTech, %message%
-	Return
-
 
 ; ACTUAL HOTKEYS AND SHORTCUTS
 ;------------------------------
 
-^AppsKey::Run, taskmgr
+#AppsKey::Run, taskmgr
 	
-^!r::
-^+r::
+^#r::
 	Run, C:\Windows\System32\EmptyRecycleBin.exe
 	Return
 	
@@ -193,18 +202,37 @@ MyHelp:
 	explorerpath:= "explorer /e," "D:\"
 	Run, %explorerpath%
 	Return
-	
+
+#e::
+	explorerpath:= "explorer /e," "E:\"
+	Run, %explorerpath%
+	Return
+
+#f::
+	explorerpath:= "explorer /e," "F:\"
+	Run, %explorerpath%
+	Return	
 	
 ^+f::
 	Send, {AppsKey}
 	Sleep, 100
 	Send, f
+	Sleep, 100
+	TrayTip Files2Folder, 1 file, , 16
+	Sleep, 1500
+	HideTrayTip()
 	Return
 
-^+d::
-	Send, {AppsKey}f
+^+g::
+	Send, {AppsKey}
+	Sleep, 100
+	Send, f
 	Sleep, 500
 	Send, {Enter}
+	Sleep, 100
+	TrayTip Files2Folder, multiple files, , 16
+	Sleep, 1500
+	HideTrayTip()
 	Return
 
 ^+c:: 
@@ -217,6 +245,20 @@ MyHelp:
 	Sleep, 1500
 	HideTrayTip()
 	Return
+	
+^+x:: 
+	Send, {F2}
+	Sleep, 200
+	Send, ^c
+	Send, {Esc}
+	Sleep, 100
+	Send, {Delete}
+	Sleep, 100
+	Send y
+	TrayTip Copied/Deleted, %clipboard%, , 17
+	Sleep, 1500
+	HideTrayTip()
+	Return	
 
 ^+v::
 	Send, {F2}
@@ -224,12 +266,12 @@ MyHelp:
 	Send, ^v
 	Send, {Enter}
 	Sleep 100
-	TrayTip Pasted Filename, %clipboard%, , 16
+	TrayTip Pasted Filename, %clipboard%, , 17
 	Sleep, 1500
 	HideTrayTip()
 	Return
 
-^+x:: 
+^+s:: 
 	Send, {F2}
 	Sleep, 200
 	Send, ^v
@@ -239,6 +281,13 @@ MyHelp:
 	Sleep, 2000
 	HideTrayTip()
 	Return
-
 	
-
+^+b::
+	Send, {F2}
+	Sleep 200
+	Send, ^v
+	Sleep 100
+	TrayTip Pasted Filename (stay), %clipboard%, , 17
+	Sleep, 1500
+	HideTrayTip()
+	Return	

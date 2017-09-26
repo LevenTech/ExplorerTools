@@ -7,7 +7,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;                                   |
 ; ExplorerTools by LevenTech        |
 ;                                   |
-; Version 1.6 (9-24-17)             |
+; Version 1.7 (9-25-17)             |
 ;                                   |
 ; Optional Add-Ons:                 |
 ;  - Files2Folder                   |
@@ -16,9 +16,10 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 ; FEATURE CONFIG
 ;----------------
-QuickExtensionChange = 1
-QuickProgramFiles = 1
-
+QuickExtensionChange := 1
+QuickProgramFiles := 1
+AlreadyPressed := 0
+AlreadyPressedTab := 0
 
 ; TRAY ICON CONFIGURATION
 ;-------------------------
@@ -40,7 +41,7 @@ HideTrayTip() {
     TrayTip  ; Attempt to hide it the normal way.
     if SubStr(A_OSVersion,1,3) = "10." {
         Menu Tray, NoIcon
-        Sleep 500  ; It may be necessary to adjust this sleep.
+        Sleep 200  ; It may be necessary to adjust this sleep.
         Menu Tray, Icon
     }
 }
@@ -76,6 +77,8 @@ MyHelp:
 	message = %message%`n -------------------------------------------------------
 	message = %message%`n  Win + Context: `tOpen Task Manager
 	message = %message%`n  Ctrl + Win + R: `tEmpty Recycle Bin
+	message = %message%`n  Press F4 twice: `tClose Window
+	message = %message%`n  Press F3 twice: `tClose Tab
 	message = %message%`n -------------------------------------------------------
 	message = %message%`n
 	message = %message%`n  LOCATION SHORTCUTS
@@ -188,6 +191,58 @@ EnablePFChg:
 ;------------------------------
 
 #AppsKey::Run, taskmgr
+
+F4::
+	If (AlreadyPressed = 0)
+	{
+		AlreadyPressed := 1
+		TrayTip Close Window?, Press F4 again, , 18
+		SetTimer, CancelClose, -2000
+		Return
+	}
+	HideTrayTip()
+	Send, !{F4}
+	AlreadyPressed := 0
+Return
+
+CancelClose:
+	If (AlreadyPressed = 0) {
+		Return
+	}
+	AlreadyPressed := 0
+	HideTrayTip()
+	Sleep 20
+	TrayTip Cancelled, Not Closing Window, , 17
+	Sleep 1000
+	HideTrayTip()
+Return
+
+F3::
+	If (AlreadyPressedTab = 0)
+	{
+		AlreadyPressedTab := 1
+		TrayTip Close Tab?, Press F3 again, , 18
+		SetTimer, CancelCloseTab, -2000
+		Return
+	}
+	HideTrayTip()
+	Send, ^w
+	AlreadyPressedTab := 0
+Return
+
+CancelCloseTab:
+	If (AlreadyPressedTab = 0) {
+		Return
+	}
+	AlreadyPressedTab := 0
+	HideTrayTip()
+	Sleep 20
+	TrayTip Cancelled, Not Closing Tab, , 17
+	Sleep 1000
+	HideTrayTip()
+Return
+
+	
 	
 ^#r::
 	Run, C:\Windows\System32\EmptyRecycleBin.exe

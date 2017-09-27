@@ -7,7 +7,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;                                   |
 ; ExplorerTools by LevenTech        |
 ;                                   |
-; Version 1.7 (9-25-17)             |
+; Version 1.8 (9-26-17)             |
 ;                                   |
 ; Optional Add-Ons:                 |
 ;  - Files2Folder                   |
@@ -75,10 +75,11 @@ MyHelp:
 	message = %message%`n
 	message = %message%`n  WINDOWS TOOLS
 	message = %message%`n -------------------------------------------------------
-	message = %message%`n  Win + Context: `tOpen Task Manager
-	message = %message%`n  Ctrl + Win + R: `tEmpty Recycle Bin
-	message = %message%`n  Press F4 twice: `tClose Window
-	message = %message%`n  Press F3 twice: `tClose Tab
+	message = %message%`n  Win + Context: `t`tOpen Task Manager
+	message = %message%`n  Ctrl + Win + R: `t`tEmpty Recycle Bin
+	message = %message%`n  Ctrl + Win + Space: `tMake current window "Always on Top"
+	message = %message%`n  Press F4 twice: `t`tClose Window
+	message = %message%`n  Press F3 twice: `t`tClose Tab
 	message = %message%`n -------------------------------------------------------
 	message = %message%`n
 	message = %message%`n  LOCATION SHORTCUTS
@@ -191,6 +192,8 @@ EnablePFChg:
 ;------------------------------
 
 #AppsKey::Run, taskmgr
+
+^#SPACE::  Winset, Alwaysontop, , A
 
 F4::
 	If (AlreadyPressed = 0)

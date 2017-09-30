@@ -7,7 +7,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;                                   |
 ; ExplorerTools by LevenTech        |
 ;                                   |
-; Version 1.9 (9-29-17)             |
+; Version 1.91 (9-30-17)            |
 ;                                   |
 ; Optional Add-Ons:                 |
 ;  - Files2Folder                   |
@@ -32,8 +32,9 @@ Menu, Tray, Add, Disable Auto-Extension Change, DisableExtChg
 Menu, Tray, Add, Disable Auto-Program Files Change, DisablePFChg
 Menu, Tray, Add, Download Files2Folder, DownloadF2F
 Menu, Tray, Add
-Menu, Tray, Add, Edit Script, EditScript
-Menu, Tray, Add, Exit Script to Recompile, ReloadScript
+;OPTIONAL ITEMS, ONLY NEEDED FOR EXES
+;Menu, Tray, Add, Edit Script, EditScript
+;Menu, Tray, Add, Exit Script to Recompile, ReloadScript
 Menu, Tray, Default, Instructions 
 Menu, Tray, Standard
 

@@ -7,7 +7,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;                                   |
 ; ExplorerTools by LevenTech        |
 ;                                   |
-; Version 1.8 (9-26-17)             |
+; Version 1.9 (9-29-17)             |
 ;                                   |
 ; Optional Add-Ons:                 |
 ;  - Files2Folder                   |
@@ -36,6 +36,8 @@ Menu, Tray, Add, Edit Script, EditScript
 Menu, Tray, Add, Exit Script to Recompile, ReloadScript
 Menu, Tray, Default, Instructions 
 Menu, Tray, Standard
+
+SetTimer, SearchLoop, -100
 
 HideTrayTip() {
     TrayTip  ; Attempt to hide it the normal way.
@@ -245,7 +247,38 @@ CancelCloseTab:
 	HideTrayTip()
 Return
 
-	
+PrefaceSearch(char)
+{
+	TrayTip, =%FirstLetterTyped%, =%FirstLetterTyped%, , 16
+	if (FirstLetterTyped = 1)
+	{
+		Send, {%char%}
+	} else
+	{
+		FirstLetterTyped = 1
+		Send, folders: {%char%}
+		While, FirstLetterTyped = 1
+		{
+			IfWinNotActive, Cortana
+			{
+				FirstLetterTyped = 0
+			}
+		}
+	}
+	Return
+}
+
+SearchLoop:
+	While, 1
+	{
+		WinWaitActive, Cortana
+		Input, CI_KeyVar, V I L1
+		TrayTip, Cortana Search Detected, Starting Folder Search
+		Send, {backspace}folders:%CI_KeyVar%
+		WinWaitNotActive, Cortana
+	}
+Return	
+
 	
 ^#r::
 	Run, C:\Windows\System32\EmptyRecycleBin.exe

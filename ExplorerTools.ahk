@@ -37,8 +37,6 @@ Menu, Tray, Add, Exit Script to Recompile, ReloadScript
 Menu, Tray, Default, Instructions 
 Menu, Tray, Standard
 
-SetTimer, SearchLoop, -100
-
 HideTrayTip() {
     TrayTip  ; Attempt to hide it the normal way.
     if SubStr(A_OSVersion,1,3) = "10." {
@@ -193,6 +191,14 @@ EnablePFChg:
 ; ACTUAL HOTKEYS AND SHORTCUTS
 ;------------------------------
 
+^#f::
+	Send, {AppsKey}r
+	Sleep 200
+	Send, ^+{Tab}
+Return
+
+AppsKey::Run, taskmgr
+
 #AppsKey::Run, taskmgr
 
 ^#SPACE::  Winset, Alwaysontop, , A
@@ -246,38 +252,6 @@ CancelCloseTab:
 	Sleep 1000
 	HideTrayTip()
 Return
-
-PrefaceSearch(char)
-{
-	TrayTip, =%FirstLetterTyped%, =%FirstLetterTyped%, , 16
-	if (FirstLetterTyped = 1)
-	{
-		Send, {%char%}
-	} else
-	{
-		FirstLetterTyped = 1
-		Send, folders: {%char%}
-		While, FirstLetterTyped = 1
-		{
-			IfWinNotActive, Cortana
-			{
-				FirstLetterTyped = 0
-			}
-		}
-	}
-	Return
-}
-
-SearchLoop:
-	While, 1
-	{
-		WinWaitActive, Cortana
-		Input, CI_KeyVar, V I L1
-		TrayTip, Cortana Search Detected, Starting Folder Search
-		Send, {backspace}folders:%CI_KeyVar%
-		WinWaitNotActive, Cortana
-	}
-Return	
 
 	
 ^#r::

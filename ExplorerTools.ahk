@@ -7,19 +7,28 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;                                   |
 ; ExplorerTools by LevenTech        |
 ;                                   |
-; Version 1.91 (9-30-17)            |
+; Version 2.0 (10-4-17)				|
+;                                   |
+; Included Add-Ons:                 |
+;  - VideoFolderIcons				|
+;  - QuickIncrement					|
 ;                                   |
 ; Optional Add-Ons:                 |
 ;  - Files2Folder                   |
 ;-----------------------------------|
 
 
-; FEATURE CONFIG
-;----------------
-QuickExtensionChange := 1
-QuickProgramFiles := 1
+; VAR INITIALIZE
+;-----------------------
 AlreadyPressed := 0
 AlreadyPressedTab := 0
+
+
+; FEATURE CONFIG
+;-------------------------
+QuickExtensionChange := 0   ;Turned OFF because I haven't gotten the window name right (affects too many renames)
+QuickProgramFiles := 1
+
 
 ; TRAY ICON CONFIGURATION
 ;-------------------------
@@ -28,13 +37,14 @@ Menu, Tray, Icon, ExplorerTools.ico, 1, 0
 
 Menu, Tray, NoStandard
 Menu, Tray, Add, Instructions, MyHelp
-Menu, Tray, Add, Disable Auto-Extension Change, DisableExtChg
-Menu, Tray, Add, Disable Auto-Program Files Change, DisablePFChg
 Menu, Tray, Add, Download Files2Folder, DownloadF2F
 Menu, Tray, Add
-;OPTIONAL ITEMS, ONLY NEEDED FOR EXES
-;Menu, Tray, Add, Edit Script, EditScript
-;Menu, Tray, Add, Exit Script to Recompile, ReloadScript
+Menu, Tray, Add, Disable Auto-Extension Change, DisableExtChg
+Menu, Tray, Add, Disable Auto-Program Files Change, DisablePFChg
+Menu, Tray, Add
+Menu, Tray, Add, Start QuickIncrement Add-On, QuickIncrement
+Menu, Tray, Add, Start VideoFolderIcons Add-On, VideoFolderIcons
+Menu, Tray, Add
 Menu, Tray, Default, Instructions 
 Menu, Tray, Standard
 
@@ -46,6 +56,47 @@ HideTrayTip() {
         Menu Tray, Icon
     }
 }
+
+SetTimer, MyLoop, -100
+Return
+
+; MENU OPTIONS
+;--------------
+DownloadF2F:
+	Run, http://skwire.dcmembers.com/wb/pages/software/files-2-folder.php
+	Return
+	
+DisableExtChg:
+	QuickExtensionChange = 0
+	Menu, Tray, Delete, Disable Auto-Extension Change
+	Menu, Tray, Insert, Download Files2Folder, Enable Auto-Extension Change, EnableExtChg
+Return
+	
+EnableExtChg:
+	QuickExtensionChange = 1
+	Menu, Tray, Delete, Enable Auto-Extension Change
+	Menu, Tray, Insert, Download Files2Folder, Disable Auto-Extension Change, DisableExtChg
+Return
+	
+DisablePFChg:
+	QuickProgramFiles = 0
+	Menu, Tray, Delete, Disable Auto-Program Files Change
+	Menu, Tray, Insert, Download Files2Folder, Enable Auto-Program Files Change, EnablePFChg
+Return
+	
+EnablePFChg:
+	QuickExtensionChange = 1
+	Menu, Tray, Delete, Enable Auto-Program Files Change
+	Menu, Tray, Insert, Download Files2Folder, Disable Auto-Program Files Change, DisablePFChg
+Return	
+
+QuickIncrement:
+	Run, QuickIncrement\QuickIncrement.ahk
+Return
+	
+VideoFolderIcons:
+	Run, VideoFolderIcons\VideoFolderIcons.ahk
+Return
 
 
 ; HELP TEXT
@@ -114,9 +165,7 @@ Return
 MyLoop:
 	While, 1
 	{
-		;TrayTip Checking, Checking, 1, 16
-		;Sleep, 1000
-		;HideTrayTip()
+		Sleep 500
 		IfWinActive, Destination Folder Access Denied ahk_class OperationStatusWindow
 		{
 			if (QuickProgramFiles = 1) {
@@ -145,48 +194,7 @@ MyLoop:
 Return
 
 
-; MENU OPTIONS
-;--------------
-EditScript: 
-	message = 
-	Run, notepad++.exe "D:\OneDrive\LevenTech\Apps\GitHub\ExplorerTools\ExplorerTools.ahk"
-	Return
 
-ReloadScript: 
-	SetTimer, ExitMe, -100
-	Run, "C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe"
-	Exit
-
-ExitMe: 
-	ExitApp
-	
-DownloadF2F:
-	Run, http://skwire.dcmembers.com/wb/pages/software/files-2-folder.php
-	Return
-	
-DisableExtChg:
-	QuickExtensionChange = 0
-	Menu, Tray, Delete, Disable Auto-Extension Change
-	Menu, Tray, Insert, Download Files2Folder, Enable Auto-Extension Change, EnableExtChg
-	Return
-	
-EnableExtChg:
-	QuickExtensionChange = 1
-	Menu, Tray, Delete, Enable Auto-Extension Change
-	Menu, Tray, Insert, Download Files2Folder, Disable Auto-Extension Change, DisableExtChg
-	Return
-	
-DisablePFChg:
-	QuickProgramFiles = 0
-	Menu, Tray, Delete, Disable Auto-Program Files Change
-	Menu, Tray, Insert, Download Files2Folder, Enable Auto-Program Files Change, EnablePFChg
-	Return
-	
-EnablePFChg:
-	QuickExtensionChange = 1
-	Menu, Tray, Delete, Enable Auto-Program Files Change
-	Menu, Tray, Insert, Download Files2Folder, Disable Auto-Program Files Change, DisablePFChg
-	Return	
 
 
 ; ACTUAL HOTKEYS AND SHORTCUTS
@@ -198,9 +206,24 @@ EnablePFChg:
 	Send, ^+{Tab}
 Return
 
-AppsKey::Run, taskmgr
+#h::
+	Send, {AppsKey}
+	Send, ss
+	Send, {Enter}
+Return
 
-#AppsKey::Run, taskmgr
+^!h::
+	Send, {AppsKey}r
+	Sleep 200
+	Send, h
+	Send, {Enter}
+Return
+
+^AppsKey::
+^!AppsKey::
+#AppsKey::
+	Run, taskmgr
+Return
 
 ^#SPACE::  Winset, Alwaysontop, , A
 
@@ -287,7 +310,7 @@ Return
 	TrayTip Files2Folder, 1 file, , 16
 	Sleep, 1500
 	HideTrayTip()
-	Return
+Return
 
 ^+g::
 	Send, {AppsKey}
@@ -299,7 +322,7 @@ Return
 	TrayTip Files2Folder, multiple files, , 16
 	Sleep, 1500
 	HideTrayTip()
-	Return
+Return
 
 ^+c:: 
 	Send, {F2}
@@ -308,9 +331,7 @@ Return
 	Send, {Esc}
 	Sleep, 100
 	TrayTip Copied Filename, %clipboard%, , 16
-	Sleep, 1500
-	HideTrayTip()
-	Return
+Return
 	
 ^+x:: 
 	Send, {F2}
@@ -322,9 +343,7 @@ Return
 	Sleep, 100
 	Send y
 	TrayTip Copied/Deleted, %clipboard%, , 17
-	Sleep, 1500
-	HideTrayTip()
-	Return	
+Return	
 
 ^+v::
 	Send, {F2}
@@ -333,9 +352,7 @@ Return
 	Send, {Enter}
 	Sleep 100
 	TrayTip Pasted Filename, %clipboard%, , 17
-	Sleep, 1500
-	HideTrayTip()
-	Return
+Return
 
 ^+s:: 
 	Send, {F2}
@@ -344,9 +361,33 @@ Return
 	Send, .en{Enter}
 	Sleep, 100
 	TrayTip Pasted Subtitles, %clipboard%.en, , 17
-	Sleep, 2000
-	HideTrayTip()
-	Return
+Return
+	
+^+w:: 
+	Send, {F2}
+	Send, {End}
+	Send, {Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}
+	Send, {Enter}
+	TrayTip Trimmed, Removed " - Shortcut", , 17
+Return	
+
+^+a:: 
+	Send, {F2}
+	Sleep, 200
+	Send, {Home}
+	Send, ^v
+	Send, {Enter}
+	TrayTip Appended, %clipboard%, , 17
+Return
+
+^+q:: 
+	Send, {F2}
+	Sleep, 200
+	Send, {End}
+	Send, ^v
+	Send, {Enter}
+	TrayTip Appended, %clipboard%, , 17
+Return	
 	
 ^+b::
 	Send, {F2}
@@ -354,6 +395,4 @@ Return
 	Send, ^v
 	Sleep 100
 	TrayTip Pasted Filename (stay), %clipboard%, , 17
-	Sleep, 1500
-	HideTrayTip()
-	Return	
+Return	

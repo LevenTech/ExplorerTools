@@ -7,7 +7,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;                                   |
 ; ExplorerTools by LevenTech        |
 ;                                   |
-; Version 2.0 (10-4-17)				|
+; Version 2.01 (10-4-17)			|
 ;                                   |
 ; Included Add-Ons:                 |
 ;  - VideoFolderIcons				|
@@ -33,7 +33,7 @@ QuickProgramFiles := 1
 ; TRAY ICON CONFIGURATION
 ;-------------------------
 Menu, Tray, Tip, ExplorerTools by LevenTech
-Menu, Tray, Icon, ExplorerTools.ico, 1, 0
+Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools.ico, 1, 0
 
 Menu, Tray, NoStandard
 Menu, Tray, Add, Instructions, MyHelp
@@ -195,38 +195,94 @@ Return
 
 
 
+#NumPad1::
+#NumPad2::
+#NumPad3::
+#NumPad4::
+#NumPad5::
+#NumPad6::
+#NumPad7::
+#NumPad8::
+#NumPad9::
+^NumPad1::
+^NumPad2::
+^NumPad3::
+^NumPad4::
+^NumPad5::
+^NumPad6::
+^NumPad7::
+^NumPad8::
+^NumPad9::
+!^NumPad1::
+!^NumPad2::
+!^NumPad3::
+!^NumPad4::
+!^NumPad5::
+!^NumPad6::
+!^NumPad7::
+!^NumPad8::
+!^NumPad9::
+	if (GetKeyState("NumLock", "T"))
+	{
+		MsgBox, 4, ,NumLock is ON. Turn it OFF?, 3
+		IfMsgBox, No
+			Return
+		IfMsgBox, Timeout
+			Return
+		SetNumLockState , Off
+	}
+Return
+
 
 
 ; ACTUAL HOTKEYS AND SHORTCUTS
 ;------------------------------
 
-^#f::
-	Send, {AppsKey}r
-	Sleep 200
-	Send, ^+{Tab}
+^RButton::
+	Send, {RButton}{Down 3}{Enter}
 Return
 
-#h::
-	Send, {AppsKey}
-	Send, ss
-	Send, {Enter}
-Return
 
-^!h::
-	Send, {AppsKey}r
-	Sleep 200
-	Send, h
-	Send, {Enter}
+; BASIC WINDOWS FEATURES (TASKMGR, RECYCLE BIN, ALWAYS ON TOP)
+;------------------------------------------------------------------
+^#r::
+	Run, EmptyRecycleBin.exe
 Return
-
+	
 ^AppsKey::
 ^!AppsKey::
 #AppsKey::
 	Run, taskmgr
 Return
 
-^#SPACE::  Winset, Alwaysontop, , A
+#SPACE::
+	Winset, Alwaysontop, , A
+	TrayTip Always On Top, Toggled Window's Hidden Status, , 16
+Return
 
+
+
+; HIDDEN ITEMS OPERATIONS
+;------------------------------------------------
+#h::
+	Send, {AppsKey}
+	Send, sss
+	Send, {Enter}
+	TrayTip Hidden Items, Toggled "Show Hidden", , 16
+Return
+
+^+h::
+	Send, {AppsKey}r
+	Sleep 200
+	Send, h
+	Send, {Enter}
+	TrayTip Hidden Items, Toggled File's Hidden Status, , 16
+Return
+
+
+
+; CLOSE WINDOWS AND TABS WITH F4/F3 DOUBLE-PRESS
+;----------------------------------------------------
 F4::
 	If (AlreadyPressed = 0)
 	{
@@ -277,11 +333,11 @@ CancelCloseTab:
 	HideTrayTip()
 Return
 
-	
-^#r::
-	Run, C:\Windows\System32\EmptyRecycleBin.exe
-	Return
-	
+
+
+
+; OPEN DRIVES
+;----------------------------------------------
 #c::
 	explorerpath:= "explorer /e," "C:\"
 	Run, %explorerpath%
@@ -302,6 +358,10 @@ Return
 	Run, %explorerpath%
 	Return	
 	
+
+	
+; FILES2FOLDER AND FILENAME OPERATIONS
+;----------------------------------------------
 ^+f::
 	Send, {AppsKey}
 	Sleep, 100
@@ -363,14 +423,6 @@ Return
 	TrayTip Pasted Subtitles, %clipboard%.en, , 17
 Return
 	
-^+w:: 
-	Send, {F2}
-	Send, {End}
-	Send, {Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}
-	Send, {Enter}
-	TrayTip Trimmed, Removed " - Shortcut", , 17
-Return	
-
 ^+a:: 
 	Send, {F2}
 	Sleep, 200

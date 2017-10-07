@@ -41,9 +41,7 @@ Menu, Tray, Add, Download Files2Folder, DownloadF2F
 Menu, Tray, Add
 Menu, Tray, Add, Disable Auto-Extension Change, DisableExtChg
 Menu, Tray, Add, Disable Auto-Program Files Change, DisablePFChg
-Menu, Tray, Add
 Menu, Tray, Add, Start QuickIncrement Add-On, QuickIncrement
-Menu, Tray, Add, Start VideoFolderIcons Add-On, VideoFolderIcons
 Menu, Tray, Add
 Menu, Tray, Default, Instructions 
 Menu, Tray, Standard
@@ -94,10 +92,6 @@ QuickIncrement:
 	Run, QuickIncrement\QuickIncrement.ahk
 Return
 	
-VideoFolderIcons:
-	Run, VideoFolderIcons\VideoFolderIcons.ahk
-Return
-
 
 ; HELP TEXT
 ;-----------
@@ -134,13 +128,7 @@ MyHelp:
 	message = %message%`n  Press F3 twice: `t`tClose Tab
 	message = %message%`n -------------------------------------------------------
 	message = %message%`n
-	message = %message%`n  LOCATION SHORTCUTS
-	message = %message%`n -------------------------------------------------------
-	message = %message%`n  Win + C: `tOpen C:\ drive
-	message = %message%`n  Win + D: `tOpen D:\ drive
-	message = %message%`n  Win + E: `tOpen E:\ drive
-	message = %message%`n  Win + F: `tOpen F:\ drive
-	message = %message%`n -------------------------------------------------------
+	message = %message%`n  Ctrl + Win + [C/D/E/F]: `tOpen [C/D/E/F]: drive
 	message = %message%`n
 	message = %message%`n  FILE NAME COPY / PASTE TOOLS
 	message = %message%`n -----------------------------------------------------------------------------
@@ -233,6 +221,49 @@ Return
 	}
 Return
 
+
+^#RButton::
+	Send, {RButton}
+	Send, {Up}
+	Send, {Enter}
+	Sleep 500
+	Send, ^+{Tab}
+	Send, {Tab}
+	Send, {Tab}
+	Send, {Enter}
+	Sleep 200
+	Send, ^v
+	Send, {Enter}
+	Sleep 200
+	Send, {Tab}
+	Send, {Tab}
+	Send, {Tab}
+	Send, {Enter}
+	TrayTip, Icon File Chosen, %clipboard%, 16
+Return
+
+^#MButton::
+	Send, {RButton}
+	Send, {Up}
+	Send, {Enter}
+	Sleep 500
+	Send, ^+{Tab}
+	Send, {Tab}
+	Send, {Tab}
+	Send, {Tab}
+	Send, {Tab}
+	Send, {Enter}
+	Sleep 200
+	Send, ^v
+	Send, {Enter}
+	Send, {Tab}
+	Send, {Tab}
+	Send, {Enter}
+	Sleep 100
+	Send, {Tab}
+	Send, {Enter}
+	TrayTip, Icon Chosen, %clipboard%, 16
+Return
 
 
 ; ACTUAL HOTKEYS AND SHORTCUTS
@@ -338,22 +369,22 @@ Return
 
 ; OPEN DRIVES
 ;----------------------------------------------
-#c::
+^#c::
 	explorerpath:= "explorer /e," "C:\"
 	Run, %explorerpath%
 	Return
 	
-#d::
+^#d::
 	explorerpath:= "explorer /e," "D:\"
 	Run, %explorerpath%
 	Return
 
-#e::
+^#e::
 	explorerpath:= "explorer /e," "E:\"
 	Run, %explorerpath%
 	Return
 
-#f::
+^#f::
 	explorerpath:= "explorer /e," "F:\"
 	Run, %explorerpath%
 	Return	

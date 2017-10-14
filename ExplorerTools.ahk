@@ -5,15 +5,15 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 ;-----------------------------------|
 ;                                   |
-; ExplorerTools by LevenTech        |
-;                                   |
-; Version 2.01 (10-4-17)			|
-;                                   |
-; Included Add-Ons:                 |
-;  - VideoFolderIcons				|
-;  - QuickIncrement					|
-;                                   |
-; Optional Add-Ons:                 |
+; ExplorerTools by LevenTech        
+;                                   
+; Version 2.1 (10-13-17)			
+;                                   
+; Included Add-Ons:                 
+;  - VideoFolderIcons				
+;  - QuickIncrement					
+;                                   
+; Optional Add-Ons:                 
 ;  - Files2Folder                   |
 ;-----------------------------------|
 
@@ -28,7 +28,7 @@ AlreadyPressedTab := 0
 ;-------------------------
 QuickExtensionChange := 0   ;Turned OFF because I haven't gotten the window name right (affects too many renames)
 QuickProgramFiles := 1
-
+QuickIncrement := 1
 
 ; TRAY ICON CONFIGURATION
 ;-------------------------
@@ -37,11 +37,11 @@ Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools.ico, 1, 0
 
 Menu, Tray, NoStandard
 Menu, Tray, Add, Instructions, MyHelp
-Menu, Tray, Add, Download Files2Folder, DownloadF2F
 Menu, Tray, Add
-Menu, Tray, Add, Disable Auto-Extension Change, DisableExtChg
+Menu, Tray, Add, Enable Auto-Extension Change, DisableExtChg
 Menu, Tray, Add, Disable Auto-Program Files Change, DisablePFChg
-Menu, Tray, Add, Start QuickIncrement Add-On, QuickIncrement
+Menu, Tray, Add, Disable QuickIncrement Add-On, DisableQuickIncrement
+Menu, Tray, Add, Download Files2Folder, DownloadF2F
 Menu, Tray, Add
 Menu, Tray, Default, Instructions 
 Menu, Tray, Standard
@@ -86,12 +86,21 @@ EnablePFChg:
 	QuickExtensionChange = 1
 	Menu, Tray, Delete, Enable Auto-Program Files Change
 	Menu, Tray, Insert, Download Files2Folder, Disable Auto-Program Files Change, DisablePFChg
-Return	
+Return
 
-QuickIncrement:
-	Run, QuickIncrement\QuickIncrement.ahk
+DisableQuickIncrement:
+	QuickIncrement = 0
+	Menu, Tray, Delete, Disable QuickIncrement Add-On
+	Menu, Tray, Insert, Download Files2Folder, Enable QuickIncrement Add-On, EnableQuickIncrement
 Return
 	
+EnableQuickIncrement:
+	QuickIncrement = 1
+	Menu, Tray, Delete, Enable QuickIncrement Add-On
+	Menu, Tray, Insert, Download Files2Folder, Disable QuickIncrement Add-On, DisableQuickIncrement
+Return	
+
+
 
 ; HELP TEXT
 ;-----------
@@ -115,20 +124,34 @@ MyHelp:
 		message = %message%`n      (disable the prompt from the tray icon)
 	}
 	message = %message%`n
+	if (QuickIncrement = 1) {
+		message = %message%`n Quick Increment is ON
+		message = %message%`n      (disable from the tray icon)
+	} else {
+		message = %message%`n Quick Increment is OFF
+		message = %message%`n      (enable from the tray icon)
+	}
 	message = %message%`n
+	message = %message%`n  -- HELP ---------------------------------------
 	message = %message%`n  Ctrl + Alt/Shift + ?: `tOpen This Help Window
+	message = %message%`n  -----------------------------------------------
 	message = %message%`n
 	message = %message%`n
-	message = %message%`n  WINDOWS TOOLS
-	message = %message%`n -------------------------------------------------------
 	message = %message%`n  Win + Context: `t`tOpen Task Manager
+	message = %message%`n  Ctrl + Win + [C/D/E/F]: `tOpen [C/D/E/F]: drive
+	message = %message%`n
 	message = %message%`n  Ctrl + Win + R: `t`tEmpty Recycle Bin
+	message = %message%`n
 	message = %message%`n  Ctrl + Win + Space: `tMake current window "Always on Top"
+	message = %message%`n
+	message = %message%`n  Win + H:`t`t Toggle "Show Hidden Files"
+	message = %message%`n  Ctrl + Win + H:`t`t Toggle "Hidden" Status for File or Folder
+	message = %message%`n  Ctrl + Win + G:`t`t Toggle "Hidden" Status for Shortcut
+	message = %message%`n
 	message = %message%`n  Press F4 twice: `t`tClose Window
 	message = %message%`n  Press F3 twice: `t`tClose Tab
-	message = %message%`n -------------------------------------------------------
 	message = %message%`n
-	message = %message%`n  Ctrl + Win + [C/D/E/F]: `tOpen [C/D/E/F]: drive
+	message = %message%`n
 	message = %message%`n
 	message = %message%`n  FILE NAME COPY / PASTE TOOLS
 	message = %message%`n -----------------------------------------------------------------------------
@@ -223,6 +246,7 @@ Return
 
 
 ^#RButton::
+	Sleep 500
 	Send, {RButton}
 	Send, {Up}
 	Send, {Enter}
@@ -239,10 +263,30 @@ Return
 	Send, {Tab}
 	Send, {Tab}
 	Send, {Enter}
-	TrayTip, Icon File Chosen, %clipboard%, 16
+	TrayTip Icon File Chosen, %clipboard%, 16
 Return
 
-^#MButton::
+^!+r::
+	Send, {AppsKey}
+	Send, {Up}
+	Send, {Enter}
+	Sleep 500
+	Send, ^+{Tab}
+	Send, {Tab}
+	Send, {Tab}
+	Send, {Tab}
+	Send, {Tab}
+	Send, {Enter}
+	Sleep 200
+	Send, !r
+	Sleep 200
+	Send, {Tab}
+	Send, {Enter}
+	TrayTip Icon File Restored, Now Using Default, 16
+Return
+
+^#+RButton::
+	Sleep 500
 	Send, {RButton}
 	Send, {Up}
 	Send, {Enter}
@@ -262,7 +306,7 @@ Return
 	Sleep 100
 	Send, {Tab}
 	Send, {Enter}
-	TrayTip, Icon Chosen, %clipboard%, 16
+	TrayTip Icon Chosen, %clipboard%, 16
 Return
 
 
@@ -288,29 +332,58 @@ Return
 
 #SPACE::
 	Winset, Alwaysontop, , A
-	TrayTip Always On Top, Toggled Window's Hidden Status, , 16
+	TrayTip Always On Top, Toggled Window's AlwaysOnTop, , 16
 Return
 
 
 
 ; HIDDEN ITEMS OPERATIONS
 ;------------------------------------------------
-#h::
-	Send, {AppsKey}
-	Send, sss
-	Send, {Enter}
-	TrayTip Hidden Items, Toggled "Show Hidden", , 16
-Return
-
-^+h::
+^#h::
 	Send, {AppsKey}r
-	Sleep 200
+	Sleep 500
 	Send, h
 	Send, {Enter}
-	TrayTip Hidden Items, Toggled File's Hidden Status, , 16
+	;TrayTip Hidden Items, Toggled File's Hidden Status, , 16
 Return
 
+^#g::
+	Send, {AppsKey}r
+	Sleep 500
+	Send, ^+{Tab}
+	Send, h
+	Send, {Enter}
+	;TrayTip Hidden Items, Toggled Shortcut's Hidden Status, , 16
+Return
 
+!h::
+	IfWinActive, ahk_exe explorer.exe
+	{
+		Send, {Alt}
+		Send, v
+		Send, hh
+		;TrayTip Toggled Hidden, Toggled "Show Hidden Files", , 16
+	}
+Return
+
+!n::
+	IfWinActive, ahk_exe explorer.exe
+	{
+		Send, {Alt}
+		Send, v
+		Send, n
+		Send, {Enter}
+	}
+Return
+
+!p::
+	IfWinActive, ahk_exe explorer.exe
+	{
+		Send, {Alt}
+		Send, v
+		Send, p
+	}
+Return
 
 ; CLOSE WINDOWS AND TABS WITH F4/F3 DOUBLE-PRESS
 ;----------------------------------------------------
@@ -479,3 +552,93 @@ Return
 	Sleep 100
 	TrayTip Pasted Filename (stay), %clipboard%, , 17
 Return	
+
+
+
+
+;-----------------------------------|
+; QuickIncrement by LevenTech       |
+;-----------------------------------|
+	
+^+1::
+	IncVal := 1
+	Goto, DoIt
+^+2::
+	IncVal := 2
+	Goto, DoIt
+^+3::
+	IncVal := 3
+	Goto, DoIt
+^+4::
+	IncVal := 4
+	Goto, DoIt
+^+5::
+	IncVal := 5
+	Goto, DoIt
+^+6::
+	IncVal := 6
+	Goto, DoIt
+^+7::
+	IncVal := 7
+	Goto, DoIt
+^+8::
+	IncVal := 8
+	Goto, DoIt
+^+9::
+	IncVal := 9
+	Goto, DoIt
+
+MarkupNumbers(str)
+{
+	Loop, 10 {
+		ThisNumber :=  A_Index-1
+		StringReplace, str, str, %ThisNumber%, &&%ThisNumber%$$, All
+	}
+	StringReplace, str, str, $$&&, , All
+	return str
+}
+	
+DoIt:
+	if QuickIncrement=0 
+	{
+		Return
+	}
+	Send ^c
+	OldVal = %clipboard%
+	NewVal := MarkupNumbers(OldVal)
+	RegexReplace(NewVal,"&&","&&",NumCount)
+	NextIncVal := IncVal
+	Loop, 100 {
+		ThisNumber :=  A_Index-1
+		StringReplace, NewVal, NewVal, &&%ThisNumber%$$, %NextIncVal%, All
+		NextIncVal+=1
+	}
+	StringReplace, NewVal, NewVal, &&, , All
+	StringReplace, NewVal, NewVal, $$, , All
+	If (OldVal != NewVal)
+	{
+		clipboard = %NewVal%
+		Send ^v
+		TrayTip Increment: +%IncVal%,Updated %NumCount% numbers, , 17
+	}
+Return
+
+
+^+0::
+	Send ^c
+	OldVal = %clipboard%
+	NewVal := MarkupNumbers(OldVal)
+	RegexReplace(NewVal,"&&","&&",NumCount)
+	Loop, 100 {
+		ThisChar :=  A_Index-1
+		StringReplace, NewVal, NewVal, &&%ThisChar%$$, , All
+	}
+	StringReplace, NewVal, NewVal, &&, , All
+	StringReplace, NewVal, NewVal, $$, , All
+	If (OldVal != NewVal)
+	{
+		clipboard = %NewVal%
+		Send ^v
+		TrayTip Numbers Cleared, Cleared %NumCount% numbers, , 17
+	}
+Return

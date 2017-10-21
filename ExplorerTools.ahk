@@ -22,6 +22,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;-----------------------
 AlreadyPressed := 0
 AlreadyPressedTab := 0
+currentSort := 0
 
 
 ; FEATURE CONFIG
@@ -144,13 +145,18 @@ MyHelp:
 	message = %message%`n
 	message = %message%`n  Ctrl + Win + Space: `tMake current window "Always on Top"
 	message = %message%`n
-	message = %message%`n  Win + H:`t`t Toggle "Show Hidden Files"
 	message = %message%`n  Ctrl + Win + H:`t`t Toggle "Hidden" Status for File or Folder
 	message = %message%`n  Ctrl + Win + G:`t`t Toggle "Hidden" Status for Shortcut
 	message = %message%`n
+	message = %message%`n  Alt + H:`t`t Toggle "Show Hidden Files"
+	message = %message%`n  Alt + N:`t`t Toggle Navigation Pane
+	message = %message%`n  Alt + P:`t`t Toggle Preview Pane
+	message = %message%`n  Alt + D:`t`t Toggle Details Pane
+	message = %message%`n  Alt + V:`t`t Cycle View Type
+	message = %message%`n  Alt + S:`t`t Cycle Sort Type
+	message = %message%`n
 	message = %message%`n  Press F4 twice: `t`tClose Window
 	message = %message%`n  Press F3 twice: `t`tClose Tab
-	message = %message%`n
 	message = %message%`n
 	message = %message%`n
 	message = %message%`n  FILE NAME COPY / PASTE TOOLS
@@ -245,11 +251,10 @@ Return
 Return
 
 
-^#RButton::
+^#p::
 	Sleep 500
-	Send, {RButton}
-	Send, {Up}
-	Send, {Enter}
+	Send, {AppsKey}
+	Send, r
 	Sleep 500
 	Send, ^+{Tab}
 	Send, {Tab}
@@ -266,10 +271,9 @@ Return
 	TrayTip Icon File Chosen, %clipboard%, 16
 Return
 
-^!+r::
+^#o::
 	Send, {AppsKey}
-	Send, {Up}
-	Send, {Enter}
+	Send, r
 	Sleep 500
 	Send, ^+{Tab}
 	Send, {Tab}
@@ -309,6 +313,23 @@ Return
 	TrayTip Icon Chosen, %clipboard%, 16
 Return
 
+~=::
+	if (NOT GetKeyState("Numlock","T")) OR (NOT GetKeyState("Capslock","T")) {
+		Return
+	}
+^#=::
+	Send {AppsKey}
+	Sleep 200=
+	Send r
+	Sleep 200
+	Send !o
+	Send ^v
+	Send {Enter}
+Return
+
+
+
+
 
 ; ACTUAL HOTKEYS AND SHORTCUTS
 ;------------------------------
@@ -347,7 +368,7 @@ Return
 	;TrayTip Hidden Items, Toggled File's Hidden Status, , 16
 Return
 
-^#g::
+^#!h::
 	Send, {AppsKey}r
 	Sleep 500
 	Send, ^+{Tab}
@@ -356,35 +377,72 @@ Return
 	;TrayTip Hidden Items, Toggled Shortcut's Hidden Status, , 16
 Return
 
-!h::
-	IfWinActive, ahk_exe explorer.exe
-	{
-		Send, {Alt}
-		Send, v
-		Send, hh
-		;TrayTip Toggled Hidden, Toggled "Show Hidden Files", , 16
+
+
+
+
+; FOLDER VIEW OPTIONS
+;--------------------------------------------------------
+#IfWinActive ahk_exe explorer.exe
+
+!n:: Send {Alt}vn{Enter}
+!p:: Send {Alt}vp
+!d:: Send {Alt}vd
+
+!h:: Send {Alt}vhh
+
+!v::
+	Send {Alt}
+	Send 05
+	Send {Tab}
+	Return
+
+!s:: 
+	currentSort++
+	
+	if (currentSort = 4) {
+		currentSort := 1
+	}
+	
+	if (currentSort = 1) {
+		Send {Alt}vo{Enter}
+		TrayTip, Sorting by NAME, (Alt-S)
+	}
+	if (currentSort = 2) {
+		Send {Alt}vo{Down}{Down}{Enter}
+		TrayTip, Sorting by TYPE, (Alt-S)
+	}
+	if (currentSort = 3) {
+		Send {Alt}vo{Down}{Down}{Down}{Down}{Enter}
+		TrayTip, Sorting by DATE, (Alt-S)
+	}	
+Return
+
+^!s:: 
+	KeyWait, Ctrl
+	
+	if (currentSort = 4) {
+		currentSort := 1
+	}
+	
+	if (currentSort = 1) {
+		Send {Alt}vo{Enter}
+		TrayTip, NAME Sort Direction Changed, (Ctrl-Alt-S)
+	}
+	if (currentSort = 2) {
+		Send {Alt}vo{Down}{Down}{Enter}
+		TrayTip, TYPE Sort Direction Changed, (Ctrl-Alt-S)
+	}
+	if (currentSort = 3) {
+		Send {Alt}vo{Down}{Down}{Down}{Down}{Enter}
+		TrayTip, DATE Sort Direction Changed, (Ctrl-Alt-S)
 	}
 Return
 
-!n::
-	IfWinActive, ahk_exe explorer.exe
-	{
-		Send, {Alt}
-		Send, v
-		Send, n
-		Send, {Enter}
-	}
-Return
+#IfWinActive
+----------------------------------------------------------
 
-!p::
-	IfWinActive, ahk_exe explorer.exe
-	{
-		Send, {Alt}
-		Send, v
-		Send, p
-	}
-Return
-
+	
 ; CLOSE WINDOWS AND TABS WITH F4/F3 DOUBLE-PRESS
 ;----------------------------------------------------
 F4::
@@ -442,31 +500,24 @@ Return
 
 ; OPEN DRIVES
 ;----------------------------------------------
-^#c::
-	explorerpath:= "explorer /e," "C:\"
-	Run, %explorerpath%
-	Return
-	
-^#d::
-	explorerpath:= "explorer /e," "D:\"
-	Run, %explorerpath%
-	Return
+^#c:: OpenDrive("C")
+^#d:: OpenDrive("D")
+^#e:: OpenDrive("E")
+^#f:: OpenDrive("F")
+^#g:: OpenDrive("G")
 
-^#e::
-	explorerpath:= "explorer /e," "E:\"
+OpenDrive(drive)
+{
+	explorerpath:= "explorer /e," . drive . ":\"
 	Run, %explorerpath%
-	Return
-
-^#f::
-	explorerpath:= "explorer /e," "F:\"
-	Run, %explorerpath%
-	Return	
-	
+	WinWaitActive, %drive%
+	WinMaximize, %drive%
+}
 
 	
 ; FILES2FOLDER AND FILENAME OPERATIONS
 ;----------------------------------------------
-^+f::
+^+f:: ;MOVE TO FOLDER OF SAME NAME
 	Send, {AppsKey}
 	Sleep, 100
 	Send, f
@@ -476,7 +527,7 @@ Return
 	HideTrayTip()
 Return
 
-^+g::
+^+g:: ;MOVE MULTIPLE TO FOLDER OF SAME NAME
 	Send, {AppsKey}
 	Sleep, 100
 	Send, f
@@ -488,7 +539,7 @@ Return
 	HideTrayTip()
 Return
 
-^+c:: 
+^+c:: ;COPY FILENAME
 	Send, {F2}
 	Sleep, 200
 	Send, ^c
@@ -497,19 +548,18 @@ Return
 	TrayTip Copied Filename, %clipboard%, , 16
 Return
 	
-^+x:: 
+^+x:: ;COPY FILENAME, DELETE FILE
+
 	Send, {F2}
 	Sleep, 200
 	Send, ^c
 	Send, {Esc}
-	Sleep, 100
 	Send, {Delete}
 	Sleep, 100
-	Send y
 	TrayTip Copied/Deleted, %clipboard%, , 17
 Return	
 
-^+v::
+^+v:: ;PASTE FILENAME
 	Send, {F2}
 	Sleep 200
 	Send, ^v
@@ -518,7 +568,15 @@ Return
 	TrayTip Pasted Filename, %clipboard%, , 17
 Return
 
-^+s:: 
+^+b:: ;PASTE FILENAME AND STAY IN EDIT MODE
+	Send, {F2}
+	Sleep 200
+	Send, ^v
+	Sleep 100
+	TrayTip Pasted Filename (stay), %clipboard%, , 17
+Return	
+
+^+s:: ;PASTE FILENAME AND APPEND ".EN"
 	Send, {F2}
 	Sleep, 200
 	Send, ^v
@@ -527,7 +585,7 @@ Return
 	TrayTip Pasted Subtitles, %clipboard%.en, , 17
 Return
 	
-^+a:: 
+^+a:: ;PRE-PEND CLIPBOARD TO FILENAME
 	Send, {F2}
 	Sleep, 200
 	Send, {Home}
@@ -536,7 +594,7 @@ Return
 	TrayTip Appended, %clipboard%, , 17
 Return
 
-^+q:: 
+^+q:: ;APPEND CLIPBOARD TO FILENAME
 	Send, {F2}
 	Sleep, 200
 	Send, {End}
@@ -545,15 +603,6 @@ Return
 	TrayTip Appended, %clipboard%, , 17
 Return	
 	
-^+b::
-	Send, {F2}
-	Sleep 200
-	Send, ^v
-	Sleep 100
-	TrayTip Pasted Filename (stay), %clipboard%, , 17
-Return	
-
-
 
 
 ;-----------------------------------|

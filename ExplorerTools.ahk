@@ -23,6 +23,9 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 AlreadyPressed := 0
 AlreadyPressedTab := 0
 currentSort := 0
+currentGroup := 0
+commentsGrouper := 0
+
 
 
 ; FEATURE CONFIG
@@ -35,6 +38,7 @@ QuickIncrement := 1
 ;-------------------------
 Menu, Tray, Tip, ExplorerTools by LevenTech
 Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools.ico, 1, 0
+SetTimer, IconCheck, 1000
 
 Menu, Tray, NoStandard
 Menu, Tray, Add, Instructions, MyHelp
@@ -46,17 +50,28 @@ Menu, Tray, Add, Download Files2Folder, DownloadF2F
 Menu, Tray, Add
 Menu, Tray, Default, Instructions 
 Menu, Tray, Standard
+Return
 
-HideTrayTip() {
-    TrayTip  ; Attempt to hide it the normal way.
-    if SubStr(A_OSVersion,1,3) = "10." {
-        Menu Tray, NoIcon
-        Sleep 200  ; It may be necessary to adjust this sleep.
-        Menu Tray, Icon
-    }
+RefreshTrayTip() {
+    Menu Tray, NoIcon
+    Menu Tray, Icon
+	Return
+}
+MyTrayTip(title, text, options=0) {
+	RefreshTrayTip()
+	TrayTip %title%, %text%, , %options% 
+	RefreshTrayTip()
+	Return
 }
 
-SetTimer, MyLoop, -100
+
+IconCheck:
+	if WinActive("ahk_exe explorer.exe")
+	{
+		Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools_yellow.ico, 1, 0
+		Return
+	}
+	Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools.ico, 1, 0
 Return
 
 ; MENU OPTIONS
@@ -148,12 +163,16 @@ MyHelp:
 	message = %message%`n  Ctrl + Win + H:`t`t Toggle "Hidden" Status for File or Folder
 	message = %message%`n  Ctrl + Win + G:`t`t Toggle "Hidden" Status for Shortcut
 	message = %message%`n
+	message = %message%`n
 	message = %message%`n  Alt + H:`t`t Toggle "Show Hidden Files"
 	message = %message%`n  Alt + N:`t`t Toggle Navigation Pane
 	message = %message%`n  Alt + P:`t`t Toggle Preview Pane
 	message = %message%`n  Alt + D:`t`t Toggle Details Pane
-	message = %message%`n  Alt + V:`t`t Cycle View Type
-	message = %message%`n  Alt + S:`t`t Cycle Sort Type
+	message = %message%`n
+	message = %message%`n  Alt + V:`t`t Cycle View Mode
+	message = %message%`n  Alt + S:`t`t Cycle 'Sort By'
+	message = %message%`n  Alt + S:`t`t Cycle 'Group By'
+	message = %message%`n
 	message = %message%`n
 	message = %message%`n  Press F4 twice: `t`tClose Window
 	message = %message%`n  Press F3 twice: `t`tClose Tab
@@ -188,9 +207,9 @@ MyLoop:
 			if (QuickProgramFiles = 1) {
 				send, {enter}
 				Sleep, 100
+				RefreshTraytip()
 				TrayTip Auto-Confirmed, Change to Program Files Folder, 2, 16
-				Sleep, 2000
-				HideTrayTip()
+				RefreshTraytip()
 			} else {
 				Return
 			}
@@ -199,10 +218,9 @@ MyLoop:
 		{
 			if (QuickExtensionChange = 1) {
 				send, y
-				Sleep, 100
+				RefreshTraytip()
 				TrayTip Auto-Confirmed, Change to File Extension, 2, 16
-				Sleep, 2000
-				HideTrayTip()
+				RefreshTraytip()
 			} else {
 				Return
 			}	
@@ -251,7 +269,8 @@ Return
 Return
 
 
-^#p::
+^#p::					; CHOOSE ICON FILE FOR Folder
+Return					; TEMPORARILY DISABLED
 	Sleep 500
 	Send, {AppsKey}
 	Send, r
@@ -271,8 +290,9 @@ Return
 	TrayTip Icon File Chosen, %clipboard%, 16
 Return
 
-^#o::
-	Send, {AppsKey}
+^#o::					; RESTORE ICON TO DEFAULT
+Return					; TEMPORARILY DISABLED
+	Send, {AppsKey}		
 	Send, r
 	Sleep 500
 	Send, ^+{Tab}
@@ -289,7 +309,8 @@ Return
 	TrayTip Icon File Restored, Now Using Default, 16
 Return
 
-^#+RButton::
+^#+RButton::			; CHOOSE ICON FILE
+Return					; TEMPORARILY DISABLED
 	Sleep 500
 	Send, {RButton}
 	Send, {Up}
@@ -313,15 +334,13 @@ Return
 	TrayTip Icon Chosen, %clipboard%, 16
 Return
 
-~=::
-	if (NOT GetKeyState("Numlock","T")) OR (NOT GetKeyState("Capslock","T")) {
+; PASTE CLIPBOARD INTO COMMENTS FIELD
+~=::									; = with NUMLOCK and CAPSLOCK on
+	if (NOT GetKeyState("Numlock","T")) OR (NOT GetKeyState("Capslock","T"))
 		Return
-	}
-^#=::
-	Send {AppsKey}
-	Sleep 200=
-	Send r
-	Sleep 200
+^#=::									; Ctrl+Win+=
+	Send {AppsKey}r
+	Sleep 400
 	Send !o
 	Send ^v
 	Send {Enter}
@@ -335,8 +354,11 @@ Return
 ;------------------------------
 
 ^RButton::
-	Send, {RButton}{Down 3}{Enter}
+	Send, {RButton}e
 Return
+
+
+
 
 
 ; BASIC WINDOWS FEATURES (TASKMGR, RECYCLE BIN, ALWAYS ON TOP)
@@ -358,46 +380,33 @@ Return
 
 
 
-; HIDDEN ITEMS OPERATIONS
-;------------------------------------------------
-^#h::
-	Send, {AppsKey}r
-	Sleep 500
-	Send, h
-	Send, {Enter}
-	;TrayTip Hidden Items, Toggled File's Hidden Status, , 16
-Return
-
-^#!h::
-	Send, {AppsKey}r
-	Sleep 500
-	Send, ^+{Tab}
-	Send, h
-	Send, {Enter}
-	;TrayTip Hidden Items, Toggled Shortcut's Hidden Status, , 16
-Return
-
-
-
-
 
 ; FOLDER VIEW OPTIONS
 ;--------------------------------------------------------
 #IfWinActive ahk_exe explorer.exe
 
-!n:: Send {Alt}vn{Enter}
-!p:: Send {Alt}vp
-!d:: Send {Alt}vd
+#UseHook
 
-!h:: Send {Alt}vhh
+!n:: Send {LAlt}vn{Enter}	; SHOW NAV PANE
+!p:: Send {LAlt}vp			; SHOW PREVIEW PANE
+!d:: Send {LAlt}vd			; SHOW DETAILS PANE
 
-!v::
+!h:: Send {LAlt}vhh			; SHOW HIDDEN ITEMS
+
++!h::						; MAKE ITEM HIDDEN
+	Send, !vhs
+	Sleep 500
+	if WinActive("Confirm Attribute Changes")
+		Send {Up}{Enter}
+Return
+
+!v::						; CYCLE VIEW
 	Send {Alt}
 	Send 05
 	Send {Tab}
 	Return
 
-!s:: 
+!s:: 						; CYCLE SORT
 	currentSort++
 	
 	if (currentSort = 4) {
@@ -406,38 +415,70 @@ Return
 	
 	if (currentSort = 1) {
 		Send {Alt}vo{Enter}
-		TrayTip, Sorting by NAME, (Alt-S)
+		title = Sorting by NAME
 	}
 	if (currentSort = 2) {
 		Send {Alt}vo{Down}{Down}{Enter}
-		TrayTip, Sorting by TYPE, (Alt-S)
+		title = Sorting by TYPE
 	}
 	if (currentSort = 3) {
 		Send {Alt}vo{Down}{Down}{Down}{Down}{Enter}
-		TrayTip, Sorting by DATE, (Alt-S)
-	}	
+		title = Sorting by DATE
+	}
+	MyTrayTip(title,"(Alt+S)")
 Return
 
-^!s:: 
-	KeyWait, Ctrl
-	
-	if (currentSort = 4) {
-		currentSort := 1
-	}
-	
++!s:: 						; CHANGE SORT DIRECTION
 	if (currentSort = 1) {
 		Send {Alt}vo{Enter}
-		TrayTip, NAME Sort Direction Changed, (Ctrl-Alt-S)
 	}
 	if (currentSort = 2) {
 		Send {Alt}vo{Down}{Down}{Enter}
-		TrayTip, TYPE Sort Direction Changed, (Ctrl-Alt-S)
 	}
 	if (currentSort = 3) {
 		Send {Alt}vo{Down}{Down}{Down}{Down}{Enter}
-		TrayTip, DATE Sort Direction Changed, (Ctrl-Alt-S)
 	}
+	MyTrayTip("Sort Direction Changed","(Shift+Alt+S)")
 Return
+
+
+!g:: 						; CYCLE GROUPING
+	currentGroup++
+	
+	if (currentGroup = 5)
+		currentGroup := 1
+	
+	if (currentGroup = 1) {
+		Send {Alt}vg{Down}{Down}{Enter}
+		Message = Grouping by TYPE
+	}
+	if (currentGroup = 2) {
+		Send {Alt}vg{Down}{Down}{Down}{Down}{Down}{Down}{Enter}
+		Message = Grouping by TAGS
+	}
+	if (currentGroup = 3) {
+		Message = 
+		if (commentsGrouper = 0) {
+			Send {Alt}vg{Up}{Enter}
+			Send comm
+			Send !s{Enter}
+			commentsGrouper = 1;
+			Message = (enabled)
+			Sleep 500
+		}
+		Send {Alt}vg{Down}{Down}{Down}{Down}{Down}{Down}{Down}{Down}{Enter}
+		Message = %Message% Grouping by COMMENTS
+	}	
+	if (currentGroup = 4) {
+		;Send {Alt}vg{Enter}
+		;Sleep 300
+		Send {Alt}vg{Up}{Up}{Up}{Up}{Enter}
+		Message = NOT Grouping
+	}	
+	MyTrayTip(Message,"(Alt+G)")
+Return
+
+#UseHook Off
 
 #IfWinActive
 ----------------------------------------------------------
@@ -453,7 +494,7 @@ F4::
 		SetTimer, CancelClose, -2000
 		Return
 	}
-	HideTrayTip()
+	RefreshTraytip()
 	Send, !{F4}
 	AlreadyPressed := 0
 Return
@@ -463,11 +504,11 @@ CancelClose:
 		Return
 	}
 	AlreadyPressed := 0
-	HideTrayTip()
+	RefreshTraytip()
 	Sleep 20
 	TrayTip Cancelled, Not Closing Window, , 17
 	Sleep 1000
-	HideTrayTip()
+	RefreshTraytip()
 Return
 
 F3::
@@ -478,7 +519,7 @@ F3::
 		SetTimer, CancelCloseTab, -2000
 		Return
 	}
-	HideTrayTip()
+	RefreshTrayTip()
 	Send, ^w
 	AlreadyPressedTab := 0
 Return
@@ -488,11 +529,11 @@ CancelCloseTab:
 		Return
 	}
 	AlreadyPressedTab := 0
-	HideTrayTip()
+	RefreshTrayTip()
 	Sleep 20
 	TrayTip Cancelled, Not Closing Tab, , 17
 	Sleep 1000
-	HideTrayTip()
+	RefreshTrayTip()
 Return
 
 
@@ -524,7 +565,7 @@ OpenDrive(drive)
 	Sleep, 100
 	TrayTip Files2Folder, 1 file, , 16
 	Sleep, 1500
-	HideTrayTip()
+	RefreshTrayTip()
 Return
 
 ^+g:: ;MOVE MULTIPLE TO FOLDER OF SAME NAME
@@ -536,7 +577,7 @@ Return
 	Sleep, 100
 	TrayTip Files2Folder, multiple files, , 16
 	Sleep, 1500
-	HideTrayTip()
+	RefreshTrayTip()
 Return
 
 ^+c:: ;COPY FILENAME
@@ -549,14 +590,13 @@ Return
 Return
 	
 ^+x:: ;COPY FILENAME, DELETE FILE
-
 	Send, {F2}
 	Sleep, 200
 	Send, ^c
 	Send, {Esc}
 	Send, {Delete}
 	Sleep, 100
-	TrayTip Copied/Deleted, %clipboard%, , 17
+	TrayTip Copied Filename, %clipboard%, , 16
 Return	
 
 ^+v:: ;PASTE FILENAME
@@ -565,7 +605,7 @@ Return
 	Send, ^v
 	Send, {Enter}
 	Sleep 100
-	TrayTip Pasted Filename, %clipboard%, , 17
+	TrayTip Pasted Filename, %clipboard%, , 16
 Return
 
 ^+b:: ;PASTE FILENAME AND STAY IN EDIT MODE

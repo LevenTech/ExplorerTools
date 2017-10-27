@@ -39,14 +39,13 @@ QuickIncrement := 1
 Menu, Tray, Tip, ExplorerTools by LevenTech
 Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools.ico, 1, 0
 SetTimer, IconCheck, 1000
+SetTimer, CheckConfirmDialogs, 1000
 
 Menu, Tray, NoStandard
-Menu, Tray, Add, Instructions, MyHelp
-Menu, Tray, Add
 Menu, Tray, Add, Enable Auto-Extension Change, DisableExtChg
 Menu, Tray, Add, Disable Auto-Program Files Change, DisablePFChg
 Menu, Tray, Add, Disable QuickIncrement Add-On, DisableQuickIncrement
-Menu, Tray, Add, Download Files2Folder, DownloadF2F
+Menu, Tray, Add, Instructions, MyHelp
 Menu, Tray, Add
 Menu, Tray, Default, Instructions 
 Menu, Tray, Standard
@@ -66,7 +65,7 @@ MyTrayTip(title, text, options=0) {
 
 
 IconCheck:
-	if WinActive("ahk_exe explorer.exe")
+	if (WinActive("ahk_exe explorer.exe") AND WinActive("ahk_class CabinetWClass"))
 	{
 		Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools_yellow.ico, 1, 0
 		Return
@@ -83,37 +82,37 @@ DownloadF2F:
 DisableExtChg:
 	QuickExtensionChange = 0
 	Menu, Tray, Delete, Disable Auto-Extension Change
-	Menu, Tray, Insert, Download Files2Folder, Enable Auto-Extension Change, EnableExtChg
+	Menu, Tray, Insert, Instructions, Enable Auto-Extension Change, EnableExtChg
 Return
 	
 EnableExtChg:
 	QuickExtensionChange = 1
 	Menu, Tray, Delete, Enable Auto-Extension Change
-	Menu, Tray, Insert, Download Files2Folder, Disable Auto-Extension Change, DisableExtChg
+	Menu, Tray, Insert, Instructions, Disable Auto-Extension Change, DisableExtChg
 Return
 	
 DisablePFChg:
 	QuickProgramFiles = 0
 	Menu, Tray, Delete, Disable Auto-Program Files Change
-	Menu, Tray, Insert, Download Files2Folder, Enable Auto-Program Files Change, EnablePFChg
+	Menu, Tray, Insert, Instructions, Enable Auto-Program Files Change, EnablePFChg
 Return
 	
 EnablePFChg:
 	QuickExtensionChange = 1
 	Menu, Tray, Delete, Enable Auto-Program Files Change
-	Menu, Tray, Insert, Download Files2Folder, Disable Auto-Program Files Change, DisablePFChg
+	Menu, Tray, Insert, Instructions, Disable Auto-Program Files Change, DisablePFChg
 Return
 
 DisableQuickIncrement:
 	QuickIncrement = 0
 	Menu, Tray, Delete, Disable QuickIncrement Add-On
-	Menu, Tray, Insert, Download Files2Folder, Enable QuickIncrement Add-On, EnableQuickIncrement
+	Menu, Tray, Insert, Instructions, Enable QuickIncrement Add-On, EnableQuickIncrement
 Return
 	
 EnableQuickIncrement:
 	QuickIncrement = 1
 	Menu, Tray, Delete, Enable QuickIncrement Add-On
-	Menu, Tray, Insert, Download Files2Folder, Disable QuickIncrement Add-On, DisableQuickIncrement
+	Menu, Tray, Insert, Instructions, Disable QuickIncrement Add-On, DisableQuickIncrement
 Return	
 
 
@@ -148,34 +147,35 @@ MyHelp:
 		message = %message%`n      (enable from the tray icon)
 	}
 	message = %message%`n
+	message = %message%`n
 	message = %message%`n  -- HELP ---------------------------------------
-	message = %message%`n  Ctrl + Alt/Shift + ?: `tOpen This Help Window
-	message = %message%`n  -----------------------------------------------
+	message = %message%`n  Ctrl + Alt/Shift + ?: `t Open This Help Window
 	message = %message%`n
 	message = %message%`n
-	message = %message%`n  Win + Context: `t`tOpen Task Manager
-	message = %message%`n  Ctrl + Win + [C/D/E/F]: `tOpen [C/D/E/F]: drive
+	message = %message%`n  -- WINDOWS TOOLS ---------------------------------------
+	message = %message%`n  Win + Context: `t`t Open Task Manager
+	message = %message%`n  Ctrl + Win + [C/D/E/F]: `t Open [C/D/E/F]: drive
 	message = %message%`n
-	message = %message%`n  Ctrl + Win + R: `t`tEmpty Recycle Bin
+	message = %message%`n  Ctrl + Win + R: `t`t Empty Recycle Bin
 	message = %message%`n
-	message = %message%`n  Ctrl + Win + Space: `tMake current window "Always on Top"
+	message = %message%`n  Ctrl + Win + Space: `t Make current window "Always on Top"
 	message = %message%`n
 	message = %message%`n  Ctrl + Win + H:`t`t Toggle "Hidden" Status for File or Folder
 	message = %message%`n  Ctrl + Win + G:`t`t Toggle "Hidden" Status for Shortcut
 	message = %message%`n
+	message = %message%`n  Press F4 twice: `t`t Close Window
+	message = %message%`n  Press F3 twice: `t`t Close Tab
 	message = %message%`n
+	message = %message%`n
+	message = %message%`n  -- FOLDER OPTIONS ---------------------------------------
 	message = %message%`n  Alt + H:`t`t Toggle "Show Hidden Files"
 	message = %message%`n  Alt + N:`t`t Toggle Navigation Pane
 	message = %message%`n  Alt + P:`t`t Toggle Preview Pane
 	message = %message%`n  Alt + D:`t`t Toggle Details Pane
 	message = %message%`n
 	message = %message%`n  Alt + V:`t`t Cycle View Mode
-	message = %message%`n  Alt + S:`t`t Cycle 'Sort By'
-	message = %message%`n  Alt + S:`t`t Cycle 'Group By'
-	message = %message%`n
-	message = %message%`n
-	message = %message%`n  Press F4 twice: `t`tClose Window
-	message = %message%`n  Press F3 twice: `t`tClose Tab
+	message = %message%`n  Alt + S:`t`t Cycle 'Sort By' `t(Name >> Type >> Date Created)
+	message = %message%`n  Alt + S:`t`t Cycle 'Group By' `t(Type >> Tags >> Comments)
 	message = %message%`n
 	message = %message%`n
 	message = %message%`n  FILE NAME COPY / PASTE TOOLS
@@ -187,43 +187,25 @@ MyHelp:
 	message = %message%`n  Ctrl + Shift + X: `tPaste clipboard into filename and stay in the field
 	message = %message%`n -----------------------------------------------------------------------------
 	message = %message%`n
-	message = %message%`n  FILES2FOLDER (download add-on from tray icon)
-	message = %message%`n -----------------------------------------------------------------------------
-	message = %message%`n  Ctrl + Shift + F: `tMove file to folder with same name
-	message = %message%`n  Ctrl + Shift + G: `tMove files to folders with same names
-	message = %message%`n -----------------------------------------------------------------------------
 	MsgBox, , ExplorerTools by LevenTech, %message%
 Return
 
 
 ; ONGOING BACKGROUND CODE
 ;-------------------------
-MyLoop:
-	While, 1
+CheckConfirmDialogs:
+	IfWinActive, Destination Folder Access Denied ahk_class OperationStatusWindow
 	{
-		Sleep 500
-		IfWinActive, Destination Folder Access Denied ahk_class OperationStatusWindow
-		{
-			if (QuickProgramFiles = 1) {
-				send, {enter}
-				Sleep, 100
-				RefreshTraytip()
-				TrayTip Auto-Confirmed, Change to Program Files Folder, 2, 16
-				RefreshTraytip()
-			} else {
-				Return
-			}
+		if (QuickProgramFiles = 1) {
+			send, {enter}
+			MyTrayTip("Auto-Confirmed","Change to Program Files Folder",16)
 		}
-		IfWinActive, Rename ahk_class #32770
-		{
-			if (QuickExtensionChange = 1) {
-				send, y
-				RefreshTraytip()
-				TrayTip Auto-Confirmed, Change to File Extension, 2, 16
-				RefreshTraytip()
-			} else {
-				Return
-			}	
+	}
+	IfWinActive, Rename ahk_class #32770
+	{
+		if (QuickExtensionChange = 1) {
+			send, y
+			MyTrayTip("Auto-Confirmed","Change to File Extension",16)
 		}
 	}
 Return
@@ -287,7 +269,7 @@ Return					; TEMPORARILY DISABLED
 	Send, {Tab}
 	Send, {Tab}
 	Send, {Enter}
-	TrayTip Icon File Chosen, %clipboard%, 16
+	MyTrayTip("Icon File Chosen","%clipboard%",16)
 Return
 
 ^#o::					; RESTORE ICON TO DEFAULT
@@ -306,7 +288,7 @@ Return					; TEMPORARILY DISABLED
 	Sleep 200
 	Send, {Tab}
 	Send, {Enter}
-	TrayTip Icon File Restored, Now Using Default, 16
+	MyTrayTip("Icon File Restored","Now Using Default",16)
 Return
 
 ^#+RButton::			; CHOOSE ICON FILE
@@ -331,7 +313,7 @@ Return					; TEMPORARILY DISABLED
 	Sleep 100
 	Send, {Tab}
 	Send, {Enter}
-	TrayTip Icon Chosen, %clipboard%, 16
+	MyTrayTip("Icon Chosen","%clipboard%",16)
 Return
 
 ; PASTE CLIPBOARD INTO COMMENTS FIELD
@@ -375,7 +357,7 @@ Return
 
 #SPACE::
 	Winset, Alwaysontop, , A
-	TrayTip Always On Top, Toggled Window's AlwaysOnTop, , 16
+	MyTrayTip("Always On Top","Toggled Window's AlwaysOnTop",16)
 Return
 
 
@@ -490,11 +472,10 @@ F4::
 	If (AlreadyPressed = 0)
 	{
 		AlreadyPressed := 1
-		TrayTip Close Window?, Press F4 again, , 18
+		MyTrayTip("Close Window?","Press F4 again",18)
 		SetTimer, CancelClose, -2000
 		Return
 	}
-	RefreshTraytip()
 	Send, !{F4}
 	AlreadyPressed := 0
 Return
@@ -504,18 +485,14 @@ CancelClose:
 		Return
 	}
 	AlreadyPressed := 0
-	RefreshTraytip()
-	Sleep 20
-	TrayTip Cancelled, Not Closing Window, , 17
-	Sleep 1000
-	RefreshTraytip()
+	MyTrayTip("Cancelled","Not Closing Window",17)
 Return
 
 F3::
 	If (AlreadyPressedTab = 0)
 	{
 		AlreadyPressedTab := 1
-		TrayTip Close Tab?, Press F3 again, , 18
+		MyTrayTip("Close Tab?","Press F3 again",18)
 		SetTimer, CancelCloseTab, -2000
 		Return
 	}
@@ -529,11 +506,7 @@ CancelCloseTab:
 		Return
 	}
 	AlreadyPressedTab := 0
-	RefreshTrayTip()
-	Sleep 20
-	TrayTip Cancelled, Not Closing Tab, , 17
-	Sleep 1000
-	RefreshTrayTip()
+	MyTrayTip("Cancelled","Not Closing Tab",17)
 Return
 
 
@@ -558,27 +531,6 @@ OpenDrive(drive)
 	
 ; FILES2FOLDER AND FILENAME OPERATIONS
 ;----------------------------------------------
-^+f:: ;MOVE TO FOLDER OF SAME NAME
-	Send, {AppsKey}
-	Sleep, 100
-	Send, f
-	Sleep, 100
-	TrayTip Files2Folder, 1 file, , 16
-	Sleep, 1500
-	RefreshTrayTip()
-Return
-
-^+g:: ;MOVE MULTIPLE TO FOLDER OF SAME NAME
-	Send, {AppsKey}
-	Sleep, 100
-	Send, f
-	Sleep, 500
-	Send, {Enter}
-	Sleep, 100
-	TrayTip Files2Folder, multiple files, , 16
-	Sleep, 1500
-	RefreshTrayTip()
-Return
 
 ^+c:: ;COPY FILENAME
 	Send, {F2}
@@ -586,7 +538,7 @@ Return
 	Send, ^c
 	Send, {Esc}
 	Sleep, 100
-	TrayTip Copied Filename, %clipboard%, , 16
+	MyTrayTip("Copied Filename","%clipboard%",16)
 Return
 	
 ^+x:: ;COPY FILENAME, DELETE FILE
@@ -596,7 +548,7 @@ Return
 	Send, {Esc}
 	Send, {Delete}
 	Sleep, 100
-	TrayTip Copied Filename, %clipboard%, , 16
+	MyTrayTip("Copied Filename","%clipboard%",16)
 Return	
 
 ^+v:: ;PASTE FILENAME
@@ -605,7 +557,7 @@ Return
 	Send, ^v
 	Send, {Enter}
 	Sleep 100
-	TrayTip Pasted Filename, %clipboard%, , 16
+	MyTrayTip("Pasted Filename","%clipboard%",16)
 Return
 
 ^+b:: ;PASTE FILENAME AND STAY IN EDIT MODE
@@ -613,7 +565,7 @@ Return
 	Sleep 200
 	Send, ^v
 	Sleep 100
-	TrayTip Pasted Filename (stay), %clipboard%, , 17
+	MyTrayTip("Pasted Filename (stay)","%clipboard%",17)
 Return	
 
 ^+s:: ;PASTE FILENAME AND APPEND ".EN"
@@ -622,7 +574,7 @@ Return
 	Send, ^v
 	Send, .en{Enter}
 	Sleep, 100
-	TrayTip Pasted Subtitles, %clipboard%.en, , 17
+	MyTrayTip("Pasted Subtitles","%clipboard%.en",17)
 Return
 	
 ^+a:: ;PRE-PEND CLIPBOARD TO FILENAME
@@ -631,7 +583,7 @@ Return
 	Send, {Home}
 	Send, ^v
 	Send, {Enter}
-	TrayTip Appended, %clipboard%, , 17
+	MyTrayTip("Appended","%clipboard%",17)
 Return
 
 ^+q:: ;APPEND CLIPBOARD TO FILENAME
@@ -640,7 +592,7 @@ Return
 	Send, {End}
 	Send, ^v
 	Send, {Enter}
-	TrayTip Appended, %clipboard%, , 17
+	MyTrayTip("Appended","%clipboard%",17)
 Return	
 	
 
@@ -708,7 +660,7 @@ DoIt:
 	{
 		clipboard = %NewVal%
 		Send ^v
-		TrayTip Increment: +%IncVal%,Updated %NumCount% numbers, , 17
+		MyTrayTip("Increment: +%IncVal%","Updated %NumCount% numbers",17)
 	}
 Return
 
@@ -728,6 +680,6 @@ Return
 	{
 		clipboard = %NewVal%
 		Send ^v
-		TrayTip Numbers Cleared, Cleared %NumCount% numbers, , 17
+		MyTrayTip("Numbers Cleared","Cleared %NumCount% numbers",17)
 	}
 Return

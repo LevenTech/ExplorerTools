@@ -27,10 +27,9 @@ currentGroup := 0
 commentsGrouper := 0
 
 
-
 ; FEATURE CONFIG
 ;-------------------------
-QuickExtensionChange := 0   ;Turned OFF because I haven't gotten the window name right (affects too many renames)
+QuickExtensionChange := 1   ;Turned OFF because I haven't gotten the window name right (affects too many renames)
 QuickProgramFiles := 1
 QuickIncrement := 1
 
@@ -39,17 +38,21 @@ QuickIncrement := 1
 Menu, Tray, Tip, ExplorerTools by LevenTech
 Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools.ico, 1, 0
 SetTimer, IconCheck, 1000
-SetTimer, CheckConfirmDialogs, 1000
 
 Menu, Tray, NoStandard
-Menu, Tray, Add, Enable Auto-Extension Change, DisableExtChg
-Menu, Tray, Add, Disable Auto-Program Files Change, DisablePFChg
-Menu, Tray, Add, Disable QuickIncrement Add-On, DisableQuickIncrement
+Menu, Tray, Add, Disable Auto-Extension Change, ToggleExtChg
+Menu, Tray, Add, Disable Auto-Program Files Change, TogglePFChg
 Menu, Tray, Add, Instructions, MyHelp
 Menu, Tray, Add
 Menu, Tray, Default, Instructions 
 Menu, Tray, Standard
+
+SetTimer, CheckConfirmDialogs, 1000
+
 Return
+;=============================================
+;          END OF INITIAL RUN
+;=============================================
 
 RefreshTrayTip() {
     Menu Tray, NoIcon
@@ -64,56 +67,33 @@ MyTrayTip(title, text, options=0) {
 }
 
 
-IconCheck:
-	if (WinActive("ahk_exe explorer.exe") AND WinActive("ahk_class CabinetWClass"))
+
+; TOGGLE FEATURES (MENU OPTIONS)
+;------------------------------------------
+
+ToggleExtChg:
+	if QuickExtensionChange = 0
 	{
-		Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools_yellow.ico, 1, 0
+		QuickExtensionChange = 1
+		Menu, Tray, Rename, Enable Auto-Extension Change, Disable Auto-Extension Change
 		Return
+	} else {
+		QuickExtensionChange = 0
+		Menu, Tray, Rename, Disable Auto-Extension Change, Enable Auto-Extension Change
 	}
-	Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools.ico, 1, 0
 Return
 
-; MENU OPTIONS
-;--------------
-DownloadF2F:
-	Run, http://skwire.dcmembers.com/wb/pages/software/files-2-folder.php
-	Return
-	
-DisableExtChg:
-	QuickExtensionChange = 0
-	Menu, Tray, Delete, Disable Auto-Extension Change
-	Menu, Tray, Insert, Instructions, Enable Auto-Extension Change, EnableExtChg
+TogglePFChg:
+	if QuickProgramFiles = 0
+	{
+		QuickProgramFiles = 1
+		Menu, Tray, Rename, Enable Auto-Program Files Change, Disable Auto-Program Files Change
+		Return
+	} else {
+		QuickProgramFiles = 0
+		Menu, Tray, Rename, Disable Auto-Program Files Change, Enable Auto-Program Files Change
+	}
 Return
-	
-EnableExtChg:
-	QuickExtensionChange = 1
-	Menu, Tray, Delete, Enable Auto-Extension Change
-	Menu, Tray, Insert, Instructions, Disable Auto-Extension Change, DisableExtChg
-Return
-	
-DisablePFChg:
-	QuickProgramFiles = 0
-	Menu, Tray, Delete, Disable Auto-Program Files Change
-	Menu, Tray, Insert, Instructions, Enable Auto-Program Files Change, EnablePFChg
-Return
-	
-EnablePFChg:
-	QuickExtensionChange = 1
-	Menu, Tray, Delete, Enable Auto-Program Files Change
-	Menu, Tray, Insert, Instructions, Disable Auto-Program Files Change, DisablePFChg
-Return
-
-DisableQuickIncrement:
-	QuickIncrement = 0
-	Menu, Tray, Delete, Disable QuickIncrement Add-On
-	Menu, Tray, Insert, Instructions, Enable QuickIncrement Add-On, EnableQuickIncrement
-Return
-	
-EnableQuickIncrement:
-	QuickIncrement = 1
-	Menu, Tray, Delete, Enable QuickIncrement Add-On
-	Menu, Tray, Insert, Instructions, Disable QuickIncrement Add-On, DisableQuickIncrement
-Return	
 
 
 
@@ -130,6 +110,7 @@ MyHelp:
 		message = %message%`n File extension changes are CONFIRMED
 		message = %message%`n      (disable the prompt from the tray icon)
 	}
+
 	message = %message%`n
 	if (QuickProgramFiles = 1) {
 		message = %message%`n Program Files changes are AUTOMATIC
@@ -138,20 +119,12 @@ MyHelp:
 		message = %message%`n Program Files changes are CONFIRMED
 		message = %message%`n      (disable the prompt from the tray icon)
 	}
-	message = %message%`n
-	if (QuickIncrement = 1) {
-		message = %message%`n Quick Increment is ON
-		message = %message%`n      (disable from the tray icon)
-	} else {
-		message = %message%`n Quick Increment is OFF
-		message = %message%`n      (enable from the tray icon)
-	}
-	message = %message%`n
-	message = %message%`n
+ 
+	message = %message%`n`n
 	message = %message%`n  -- HELP ---------------------------------------
 	message = %message%`n  Ctrl + Alt/Shift + ?: `t Open This Help Window
-	message = %message%`n
-	message = %message%`n
+ 
+	message = %message%`n`n
 	message = %message%`n  -- WINDOWS TOOLS ---------------------------------------
 	message = %message%`n  Win + Context: `t`t Open Task Manager
 	message = %message%`n  Ctrl + Win + [C/D/E/F]: `t Open [C/D/E/F]: drive
@@ -160,13 +133,10 @@ MyHelp:
 	message = %message%`n
 	message = %message%`n  Ctrl + Win + Space: `t Make current window "Always on Top"
 	message = %message%`n
-	message = %message%`n  Ctrl + Win + H:`t`t Toggle "Hidden" Status for File or Folder
-	message = %message%`n  Ctrl + Win + G:`t`t Toggle "Hidden" Status for Shortcut
-	message = %message%`n
 	message = %message%`n  Press F4 twice: `t`t Close Window
 	message = %message%`n  Press F3 twice: `t`t Close Tab
-	message = %message%`n
-	message = %message%`n
+
+	message = %message%`n`n
 	message = %message%`n  -- FOLDER OPTIONS ---------------------------------------
 	message = %message%`n  Alt + H:`t`t Toggle "Show Hidden Files"
 	message = %message%`n  Alt + N:`t`t Toggle Navigation Pane
@@ -176,17 +146,22 @@ MyHelp:
 	message = %message%`n  Alt + V:`t`t Cycle View Mode
 	message = %message%`n  Alt + S:`t`t Cycle 'Sort By' `t(Name >> Type >> Date Created)
 	message = %message%`n  Alt + S:`t`t Cycle 'Group By' `t(Type >> Tags >> Comments)
-	message = %message%`n
-	message = %message%`n
-	message = %message%`n  FILE NAME COPY / PASTE TOOLS
+
+	message = %message%`n`n
+	message = %message%`n  FILE MANIPULATION
 	message = %message%`n -----------------------------------------------------------------------------
 	message = %message%`n  Ctrl + Shift + C: `tCopy filename to clipboard (no extension)
 	message = %message%`n  Ctrl + Shift + X: `tCopy filename and delete file
 	message = %message%`n  Ctrl + Shift + V: `tPaste clipboard into filename (no extension)
 	message = %message%`n  Ctrl + Shift + S: `tPaste clipboard into filename and append ".en"
 	message = %message%`n  Ctrl + Shift + X: `tPaste clipboard into filename and stay in the field
-	message = %message%`n -----------------------------------------------------------------------------
 	message = %message%`n
+	message = %message%`n  Ctrl + Shift + H: `tMake file hidden (or unhide)
+	message = %message%`n
+	message = %message%`n  QUICK-INCREMENT:
+	message = %message%`n  Ctrl + Shift + [0-9]: `tAdd [0-9] to each integer in selected text
+	message = %message%`n -----------------------------------------------------------------------------
+
 	MsgBox, , ExplorerTools by LevenTech, %message%
 Return
 
@@ -208,6 +183,15 @@ CheckConfirmDialogs:
 			MyTrayTip("Auto-Confirmed","Change to File Extension",16)
 		}
 	}
+Return
+
+IconCheck:
+	if (WinActive("ahk_exe explorer.exe") AND WinActive("ahk_class CabinetWClass"))
+	{
+		Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools_yellow.ico, 1, 0
+		Return
+	}
+	Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools.ico, 1, 0
 Return
 
 
@@ -251,69 +235,31 @@ Return
 Return
 
 
-^#p::					; CHOOSE ICON FILE FOR Folder
-Return					; TEMPORARILY DISABLED
-	Sleep 500
-	Send, {AppsKey}
-	Send, r
+^#]::					; CHOOSE ICON FILE FOR Folder
+	Send, {AppsKey}r	
 	Sleep 500
 	Send, ^+{Tab}
-	Send, {Tab}
-	Send, {Tab}
+	Send, !f
 	Send, {Enter}
 	Sleep 200
 	Send, ^v
 	Send, {Enter}
-	Sleep 200
-	Send, {Tab}
-	Send, {Tab}
-	Send, {Tab}
 	Send, {Enter}
 	MyTrayTip("Icon File Chosen","%clipboard%",16)
 Return
 
-^#o::					; RESTORE ICON TO DEFAULT
-Return					; TEMPORARILY DISABLED
-	Send, {AppsKey}		
-	Send, r
+^#\::					; CHOOSE ICON FILE
+	Send, {AppsKey}r
 	Sleep 500
 	Send, ^+{Tab}
-	Send, {Tab}
-	Send, {Tab}
-	Send, {Tab}
-	Send, {Tab}
-	Send, {Enter}
-	Sleep 200
-	Send, !r
-	Sleep 200
-	Send, {Tab}
-	Send, {Enter}
-	MyTrayTip("Icon File Restored","Now Using Default",16)
-Return
-
-^#+RButton::			; CHOOSE ICON FILE
-Return					; TEMPORARILY DISABLED
+	Send, !i
 	Sleep 500
-	Send, {RButton}
-	Send, {Up}
-	Send, {Enter}
-	Sleep 500
-	Send, ^+{Tab}
-	Send, {Tab}
-	Send, {Tab}
-	Send, {Tab}
-	Send, {Tab}
-	Send, {Enter}
-	Sleep 200
 	Send, ^v
 	Send, {Enter}
-	Send, {Tab}
+	Send, {Enter}
 	Send, {Tab}
 	Send, {Enter}
-	Sleep 100
-	Send, {Tab}
-	Send, {Enter}
-	MyTrayTip("Icon Chosen","%clipboard%",16)
+	MyTrayTip("Icon Chosen",clipboard,16)
 Return
 
 ; PASTE CLIPBOARD INTO COMMENTS FIELD
@@ -374,13 +320,6 @@ Return
 !d:: Send {LAlt}vd			; SHOW DETAILS PANE
 
 !h:: Send {LAlt}vhh			; SHOW HIDDEN ITEMS
-
-+!h::						; MAKE ITEM HIDDEN
-	Send, !vhs
-	Sleep 500
-	if WinActive("Confirm Attribute Changes")
-		Send {Up}{Enter}
-Return
 
 !v::						; CYCLE VIEW
 	Send {Alt}
@@ -529,10 +468,17 @@ OpenDrive(drive)
 }
 
 	
-; FILES2FOLDER AND FILENAME OPERATIONS
+; FILENAME OPERATIONS
 ;----------------------------------------------
 
-^+c:: ;COPY FILENAME
+^+h::						; MAKE ITEM HIDDEN
+	Send, !vhs
+	Sleep 500
+	if WinActive("Confirm Attribute Changes")
+		Send {Up}{Enter}
+Return
+
+^+c:: 						;COPY FILENAME
 	Send, {F2}
 	Sleep, 200
 	Send, ^c
@@ -541,7 +487,7 @@ OpenDrive(drive)
 	MyTrayTip("Copied Filename","%clipboard%",16)
 Return
 	
-^+x:: ;COPY FILENAME, DELETE FILE
+^+x:: 						;COPY FILENAME, DELETE FILE
 	Send, {F2}
 	Sleep, 200
 	Send, ^c
@@ -551,7 +497,7 @@ Return
 	MyTrayTip("Copied Filename","%clipboard%",16)
 Return	
 
-^+v:: ;PASTE FILENAME
+^+v:: 						;PASTE FILENAME
 	Send, {F2}
 	Sleep 200
 	Send, ^v
@@ -560,7 +506,7 @@ Return
 	MyTrayTip("Pasted Filename","%clipboard%",16)
 Return
 
-^+b:: ;PASTE FILENAME AND STAY IN EDIT MODE
+^+b:: 						;PASTE FILENAME AND STAY IN EDIT MODE
 	Send, {F2}
 	Sleep 200
 	Send, ^v
@@ -568,7 +514,7 @@ Return
 	MyTrayTip("Pasted Filename (stay)","%clipboard%",17)
 Return	
 
-^+s:: ;PASTE FILENAME AND APPEND ".EN"
+^+s:: 						;PASTE FILENAME AND APPEND ".EN"
 	Send, {F2}
 	Sleep, 200
 	Send, ^v
@@ -577,7 +523,7 @@ Return
 	MyTrayTip("Pasted Subtitles","%clipboard%.en",17)
 Return
 	
-^+a:: ;PRE-PEND CLIPBOARD TO FILENAME
+^+a:: 						;PRE-PEND CLIPBOARD TO FILENAME
 	Send, {F2}
 	Sleep, 200
 	Send, {Home}
@@ -586,7 +532,7 @@ Return
 	MyTrayTip("Appended","%clipboard%",17)
 Return
 
-^+q:: ;APPEND CLIPBOARD TO FILENAME
+^+q::						 ;APPEND CLIPBOARD TO FILENAME
 	Send, {F2}
 	Sleep, 200
 	Send, {End}

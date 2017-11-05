@@ -37,17 +37,16 @@ QuickIncrement := 1
 ;-------------------------
 Menu, Tray, Tip, ExplorerTools by LevenTech
 Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools.ico, 1, 0
-SetTimer, IconCheck, 1000
 
 Menu, Tray, NoStandard
+Menu, Tray, Add, How to use ExplorerTools, MyHelp
 Menu, Tray, Add, Disable Auto-Extension Change, ToggleExtChg
 Menu, Tray, Add, Disable Auto-Program Files Change, TogglePFChg
-Menu, Tray, Add, Instructions, MyHelp
 Menu, Tray, Add
-Menu, Tray, Default, Instructions 
+Menu, Tray, Default, How to use ExplorerTools 
 Menu, Tray, Standard
 
-SetTimer, CheckConfirmDialogs, 1000
+SetTimer, RepeatedFunction, 2000	; Handles Icon Check and Confirm Dialogs
 
 Return
 ;=============================================
@@ -61,7 +60,8 @@ RefreshTrayTip() {
 }
 MyTrayTip(title, text, options=0) {
 	RefreshTrayTip()
-	TrayTip %title%, %text%, , %options% 
+	TrayTip %title%, %text%, , %options%
+	Sleep 500
 	RefreshTrayTip()
 	Return
 }
@@ -158,7 +158,12 @@ MyHelp:
 	message = %message%`n
 	message = %message%`n  Ctrl + Shift + H: `tMake file hidden (or unhide)
 	message = %message%`n
-	message = %message%`n  QUICK-INCREMENT:
+	message = %message%`n  Ctrl + Win + = : `tAdd [clipboard] to Comments Field (only for shortcuts)
+	message = %message%`n  Ctrl + Win + ] : `tUse [clipboard] as file that represent folder contents
+	message = %message%`n  Ctrl + Win + \ : `tUse [clipboard] as icon for folder
+	message = %message%`n
+	message = %message%`n
+		message = %message%`n  QUICK-INCREMENT:
 	message = %message%`n  Ctrl + Shift + [0-9]: `tAdd [0-9] to each integer in selected text
 	message = %message%`n -----------------------------------------------------------------------------
 
@@ -168,7 +173,7 @@ Return
 
 ; ONGOING BACKGROUND CODE
 ;-------------------------
-CheckConfirmDialogs:
+RepeatedFunction:
 	IfWinActive, Destination Folder Access Denied ahk_class OperationStatusWindow
 	{
 		if (QuickProgramFiles = 1) {
@@ -183,6 +188,7 @@ CheckConfirmDialogs:
 			MyTrayTip("Auto-Confirmed","Change to File Extension",16)
 		}
 	}
+	Goto, IconCheck
 Return
 
 IconCheck:
@@ -234,32 +240,55 @@ Return
 	}
 Return
 
-
-^#]::					; CHOOSE ICON FILE FOR Folder
+^+#f::
+	pasteFileName = 1
+^+f::					; CHOOSE ICON FILE TO REPRESENT FOLDER
 	Send, {AppsKey}r	
 	Sleep 500
 	Send, ^+{Tab}
 	Send, !f
 	Send, {Enter}
 	Sleep 200
-	Send, ^v
-	Send, {Enter}
-	Send, {Enter}
-	MyTrayTip("Icon File Chosen","%clipboard%",16)
+	if (pasteFileName = 1)
+	{
+		Send, ^v
+		Send, {Enter}
+		Send, {Enter}
+		MyTrayTip("Icon File Chosen",clipboard,16)
+	}
+	pasteFileName = 0
 Return
 
-^#\::					; CHOOSE ICON FILE
+^+!i::
+	restoreIcon = 1
+	GoTo, doIconChange
+	Return
+^+#i::
+	pasteIcon = 1
+doIconChange:
+^+i::					; CHOOSE ICON TO REPLACE FOLDER ICON
 	Send, {AppsKey}r
 	Sleep 500
 	Send, ^+{Tab}
 	Send, !i
 	Sleep 500
-	Send, ^v
-	Send, {Enter}
-	Send, {Enter}
-	Send, {Tab}
-	Send, {Enter}
-	MyTrayTip("Icon Chosen",clipboard,16)
+	if (pasteIcon = 1)
+	{
+		Send, ^v
+		Send, {Enter}
+		Send, {Enter}
+		Send, {Tab}
+		Send, {Enter}
+		MyTrayTip("Icon Chosen",clipboard,16)
+	}
+	if (restoreIcon = 1)
+	{
+		Send, !r
+		Send, {Enter}
+		MyTrayTip("Icon Restored","Icon Restored",16)
+	}
+	pasteIcon = 0
+	restoreIcon = 0
 Return
 
 ; PASTE CLIPBOARD INTO COMMENTS FIELD

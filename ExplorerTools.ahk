@@ -20,8 +20,8 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 ; VAR INITIALIZE
 ;-----------------------
-AlreadyPressed := 0
-AlreadyPressedTab := 0
+pressedF3 := 0
+pressedF4 := 0
 currentSort := 0
 currentGroup := 0
 commentsGrouper := 0
@@ -437,46 +437,80 @@ Return
 ; CLOSE WINDOWS AND TABS WITH F4/F3 DOUBLE-PRESS
 ;----------------------------------------------------
 F4::
-	If (AlreadyPressed = 0)
+	If (pressedF4 = 0)
 	{
-		AlreadyPressed := 1
-		MyTrayTip("Close Window?","Press F4 again",18)
-		SetTimer, CancelClose, -2000
+		pressedF4 := 1
+		SetTimer, WindowLoop, -50
 		Return
 	}
 	Send, !{F4}
-	AlreadyPressed := 0
+	pressedF4 := 0
+	GoTo, IconCheck
 Return
 
-CancelClose:
-	If (AlreadyPressed = 0) {
-		Return
-	}
-	AlreadyPressed := 0
-	MyTrayTip("Cancelled","Not Closing Window",17)
+WindowLoop:
+		Loop 3
+		{
+			If (pressedF4 = 0)
+				Break
+			Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools_black.ico, 1, 0
+			Sleep, 250
+			If (pressedF4 = 0)
+				Break
+			GoSub, IconCheck
+			Sleep, 250
+		}
+		Loop 4
+		{
+			If (pressedF4 = 0)
+				Break
+			Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools_black.ico, 1, 0
+			Sleep, 100
+			If (pressedF4 = 0)
+				Break
+			GoSub, IconCheck
+			Sleep, 100
+		}		
+		pressedF4 := 0
 Return
 
 F3::
-	If (AlreadyPressedTab = 0)
+	If (pressedF3 = 0)
 	{
-		AlreadyPressedTab := 1
-		MyTrayTip("Close Tab?","Press F3 again",18)
-		SetTimer, CancelCloseTab, -2000
+		pressedF3 := 1
+		SetTimer TabLoop, -50
 		Return
 	}
-	RefreshTrayTip()
 	Send, ^w
-	AlreadyPressedTab := 0
+	pressedF3 := 0
+	GoTo, IconCheck
 Return
 
-CancelCloseTab:
-	If (AlreadyPressedTab = 0) {
-		Return
-	}
-	AlreadyPressedTab := 0
-	MyTrayTip("Cancelled","Not Closing Tab",17)
+TabLoop:
+		Loop 3
+		{
+			If (pressedF3 = 0)
+				Break
+			Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools_black.ico, 1, 0
+			Sleep, 250
+			If (pressedF3 = 0)
+				Break
+			GoSub, IconCheck
+			Sleep, 250
+		}
+		Loop 4
+		{
+			If (pressedF3 = 0)
+				Break
+			Menu, Tray, Icon, %A_ScriptDir%\Icons\ExplorerTools_black.ico, 1, 0
+			Sleep, 100
+			If (pressedF3 = 0)
+				Break
+			GoSub, IconCheck
+			Sleep, 100
+		}		
+		pressedF3 := 0
 Return
-
 
 
 

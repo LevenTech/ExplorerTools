@@ -547,7 +547,7 @@ Return
 	Send, ^c
 	Send, {Esc}
 	Sleep, 100
-	MyTrayTip("Copied Filename","%clipboard%",16)
+	;MyTrayTip("Copied Filename","%clipboard%",16)
 Return
 	
 ^+x:: 						;COPY FILENAME, DELETE FILE
@@ -557,7 +557,7 @@ Return
 	Send, {Esc}
 	Send, {Delete}
 	Sleep, 100
-	MyTrayTip("Copied Filename","%clipboard%",16)
+	;MyTrayTip("Copied Filename","%clipboard%",16)
 Return	
 
 ^+v:: 						;PASTE FILENAME
@@ -566,7 +566,7 @@ Return
 	Send, ^v
 	Send, {Enter}
 	Sleep 100
-	MyTrayTip("Pasted Filename","%clipboard%",16)
+	;MyTrayTip("Pasted Filename","%clipboard%",16)
 Return
 
 ^+b:: 						;PASTE FILENAME AND STAY IN EDIT MODE
@@ -574,7 +574,7 @@ Return
 	Sleep 200
 	Send, ^v
 	Sleep 100
-	MyTrayTip("Pasted Filename (stay)","%clipboard%",17)
+	;MyTrayTip("Pasted Filename (stay)","%clipboard%",17)
 Return	
 
 ^+s:: 						;PASTE FILENAME AND APPEND ".EN"
@@ -583,7 +583,7 @@ Return
 	Send, ^v
 	Send, .en{Enter}
 	Sleep, 100
-	MyTrayTip("Pasted Subtitles","%clipboard%.en",17)
+	;MyTrayTip("Pasted Subtitles","%clipboard%.en",17)
 Return
 	
 ^+a:: 						;PRE-PEND CLIPBOARD TO FILENAME
@@ -592,7 +592,7 @@ Return
 	Send, {Home}
 	Send, ^v
 	Send, {Enter}
-	MyTrayTip("Appended","%clipboard%",17)
+	;MyTrayTip("Appended","%clipboard%",17)
 Return
 
 ^+q::						 ;APPEND CLIPBOARD TO FILENAME
@@ -601,7 +601,7 @@ Return
 	Send, {End}
 	Send, ^v
 	Send, {Enter}
-	MyTrayTip("Appended","%clipboard%",17)
+	;MyTrayTip("Appended","%clipboard%",17)
 Return	
 	
 

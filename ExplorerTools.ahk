@@ -26,6 +26,8 @@ currentSort := 0
 currentGroup := 0
 commentsGrouper := 0
 
+SetTitleMatchMode, 2
+
 
 ; FEATURE CONFIG
 ;-------------------------
@@ -240,22 +242,25 @@ Return
 	}
 Return
 
+;F6::
 ^+#f::
 	pasteFileName = 1
 ^+f::					; CHOOSE ICON FILE TO REPRESENT FOLDER
 	Send, {AppsKey}r	
-	Sleep 500
+	Loop 20	{
+		IfWinActive Properties
+			Break
+		Sleep 100
+	}
 	Send, ^+{Tab}
 	Send, !f
-	Send, {Enter}
-	Sleep 200
-	if (pasteFileName = 1)
-	{
-		Send, ^v
-		Send, {Enter}
-		Send, {Enter}
-		MyTrayTip("Icon File Chosen",clipboard,16)
+	Loop 20	{
+		IfWinActive Browse
+			Break
+		Sleep 100
 	}
+	if (pasteFileName = 1)
+		Send, ^v{Enter}{Enter}
 	pasteFileName = 0
 Return
 
@@ -610,6 +615,7 @@ Return
 ; QuickIncrement by LevenTech       |
 ;-----------------------------------|
 	
+/*
 ^+1::
 	IncVal := 1
 	Goto, DoIt
@@ -637,6 +643,7 @@ Return
 ^+9::
 	IncVal := 9
 	Goto, DoIt
+*/
 
 MarkupNumbers(str)
 {
